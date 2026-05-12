@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/auth/session';
+import { isSafeRelative } from '@/lib/safe-redirect';
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -19,7 +20,9 @@ export async function middleware(req: NextRequest) {
   if (!session) {
     const url = req.nextUrl.clone();
     url.pathname = '/admin/login';
-    url.searchParams.set('redirect', pathname);
+    if (isSafeRelative(pathname)) {
+      url.searchParams.set('redirect', pathname);
+    }
     return NextResponse.redirect(url);
   }
 
