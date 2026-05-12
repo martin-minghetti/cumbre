@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { rateLimit, _resetRateLimitForTests } from '@/lib/rate-limit';
+import { rateLimit, _resetRateLimitForTests, clientIp } from '@/lib/rate-limit';
 
 describe('rate-limit', () => {
   beforeEach(() => _resetRateLimitForTests());
@@ -37,5 +37,22 @@ describe('rate-limit', () => {
     const r2 = rateLimit(cfg, 200);
     expect(r2.remaining).toBe(1);
     expect(r2.resetAt).toBe(1000); // resetAt = oldest hit + windowMs
+  });
+});
+
+describe('clientIp', () => {
+  it('returns first ip from x-forwarded-for', () => {
+    const req = new Request('http://x/', { headers: { 'x-forwarded-for': '1.2.3.4, 5.6.7.8' } });
+    expect(clientIp(req)).toBe('1.2.3.4');
+  });
+
+  it('falls back to x-real-ip', () => {
+    const req = new Request('http://x/', { headers: { 'x-real-ip': '9.9.9.9' } });
+    expect(clientIp(req)).toBe('9.9.9.9');
+  });
+
+  it('returns "unknown" when no forwarding headers', () => {
+    const req = new Request('http://x/');
+    expect(clientIp(req)).toBe('unknown');
   });
 });

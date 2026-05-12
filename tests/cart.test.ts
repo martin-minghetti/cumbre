@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { signCart, verifyCart, addLine, updateQty, removeLine, type Cart } from '@/lib/cart';
+import { signCart, verifyCart, addLine, updateQty, removeLine, clear, totalQty, type Cart } from '@/lib/cart';
 
 const empty: Cart = { lines: [] };
 
@@ -59,5 +59,14 @@ describe('cart mutations', () => {
   it('addLine clamps qty to max 99', () => {
     const c: Cart = { lines: [{ packId: 7, qty: 95 }] };
     expect(addLine(c, 7, 10)).toEqual({ lines: [{ packId: 7, qty: 99 }] });
+  });
+
+  it('clear returns an empty cart', () => {
+    expect(clear()).toEqual({ lines: [] });
+  });
+
+  it('totalQty sums line qty', () => {
+    expect(totalQty(empty)).toBe(0);
+    expect(totalQty({ lines: [{ packId: 1, qty: 2 }, { packId: 5, qty: 3 }] })).toBe(5);
   });
 });
