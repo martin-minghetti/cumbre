@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifySessionEdge } from '@/lib/auth/session-edge';
+import { verifySession } from '@/lib/auth/session';
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -14,7 +14,7 @@ export async function middleware(req: NextRequest) {
   if (!isAdmin && !isPos) return NextResponse.next();
 
   const token = req.cookies.get('session')?.value;
-  const session = token ? await verifySessionEdge(token) : null;
+  const session = token ? await verifySession(token) : null;
 
   if (!session) {
     const url = req.nextUrl.clone();

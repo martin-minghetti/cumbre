@@ -9,6 +9,6 @@ export async function getSession(): Promise<SessionPayload | null> {
   const store = await cookies();
   const token = store.get('session')?.value;
   if (!token) return null;
-  const payload = verifySession(token);
+  const payload = await verifySession(token);
   return payload ? { userId: payload.userId, role: payload.role } : null;
 }
