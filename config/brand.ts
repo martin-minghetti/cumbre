@@ -23,13 +23,17 @@ export const brand = {
     bg: '#0A0A0A',
     paper: '#F5F0E8',
     accent: '#C8843A',
+    accentDeep: '#8A5520',
+    glacier: '#5B7A8C',
+    snow: '#E8EEEE',
     text: '#0A0A0A',
     textInverse: '#F5F0E8',
-    muted: '#737373',
+    muted: '#8A8780',
   },
   fonts: {
     display: 'Anton',
-    body: 'Geist',
+    body: 'Newsreader',
+    mono: 'JetBrains Mono',
   },
   shipping: {
     pickup: {
