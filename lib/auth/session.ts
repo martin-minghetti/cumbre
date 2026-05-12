@@ -23,11 +23,24 @@ function sign(data: string): string {
 }
 
 export function signSession(payload: SessionPayload): string {
+  // Header is JWT-shaped and included in the signature input, but we never read it back
+  // on verify — this impl only ever produces and verifies HS256. The decorative header
+  // keeps the token format JWT-compatible for future debugging tools.
   const header = base64UrlEncode(JSON.stringify({ alg: 'HS256' }));
   const fullPayload: SignedPayload = { ...payload, exp: Date.now() + SESSION_TTL_MS };
   const body = base64UrlEncode(JSON.stringify(fullPayload));
   const signature = sign(`${header}.${body}`);
   return `${header}.${body}.${signature}`;
+}
+
+function isValidPayload(p: unknown): p is SignedPayload {
+  if (typeof p !== 'object' || p === null) return false;
+  const obj = p as Record<string, unknown>;
+  return (
+    typeof obj.userId === 'number' &&
+    (obj.role === 'owner' || obj.role === 'cashier') &&
+    typeof obj.exp === 'number'
+  );
 }
 
 export function verifySession(token: string): SignedPayload | null {
@@ -41,8 +54,8 @@ export function verifySession(token: string): SignedPayload | null {
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
 
   try {
-    const payload = JSON.parse(base64UrlDecode(body)) as SignedPayload;
-    if (typeof payload.exp !== 'number' || payload.exp < Date.now()) return null;
+    const payload = JSON.parse(base64UrlDecode(body));
+    if (!isValidPayload(payload) || payload.exp < Date.now()) return null;
     return payload;
   } catch {
     return null;
