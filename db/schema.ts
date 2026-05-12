@@ -92,6 +92,8 @@ export const stockMovements = pgTable('stock_movements', {
   batchId: integer('batch_id').references(() => batches.id),
   delta: integer('delta').notNull(),
   reason: stockReason('reason').notNull(),
+  // referenceId: polymorphic — points to orders.id, posSales.id, batches.id, or purchaseOrders.id
+  // depending on `reason`. No FK by design. Resolve via app layer using reason as discriminator.
   referenceId: integer('reference_id'),
   notes: text('notes'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -115,6 +117,7 @@ export const supplyMovements = pgTable('supply_movements', {
   supplyId: integer('supply_id').notNull().references(() => supplies.id),
   delta: integer('delta').notNull(),
   reason: supplyReason('reason').notNull(),
+  // referenceId: polymorphic — points to purchaseOrders.id or batches.id depending on `reason`.
   referenceId: integer('reference_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
@@ -176,6 +179,8 @@ export const orders = pgTable('orders', {
   fulfilledAt: timestamp('fulfilled_at', { withTimezone: true }),
 }, (t) => ({
   mpPaymentUnique: uniqueIndex('orders_mp_payment_id_unique').on(t.mpPaymentId),
+  customerIdx: index('orders_customer_idx').on(t.customerId),
+  statusIdx: index('orders_status_idx').on(t.status),
 }));
 
 export const orderItems = pgTable('order_items', {
@@ -208,7 +213,10 @@ export const posSales = pgTable('pos_sales', {
   paymentMethod: paymentMethod('payment_method').notNull(),
   customerId: integer('customer_id').references(() => customers.id),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-});
+}, (t) => ({
+  sessionIdx: index('pos_sales_session_idx').on(t.cashSessionId),
+  cashierIdx: index('pos_sales_cashier_idx').on(t.cashierId),
+}));
 
 export const posSaleItems = pgTable('pos_sale_items', {
   id: serial('id').primaryKey(),
