@@ -19,6 +19,10 @@ export type ApplyResult =
 
 class IdempotentRaceError extends Error {}
 
+function isPgUniqueViolation(e: unknown): boolean {
+  return typeof e === 'object' && e !== null && 'code' in e && (e as { code: string }).code === '23505';
+}
+
 function publicBaseUrl(): string {
   const v = process.env.VERCEL_URL;
   if (v) return `https://${v}`;
@@ -103,6 +107,9 @@ export async function applyOrderPaid(args: {
         }),
       });
       return { applied: false, cancelled: true, reason: 'insufficient_stock' };
+    }
+    if (isPgUniqueViolation(e)) {
+      return { applied: false, reason: 'already_applied' };
     }
     if (e instanceof IdempotentRaceError) {
       return { applied: false, reason: 'already_applied' };

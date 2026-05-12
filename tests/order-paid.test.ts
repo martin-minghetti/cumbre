@@ -149,6 +149,24 @@ describe('applyOrderPaid', () => {
     expect(txState.emails.length).toBe(2); // no extra emails on no-op
   });
 
+  it('returns already_applied when DB unique violation surfaces', async () => {
+    // Simulate: caller A and B both see mpPaymentId=null in loaded, both enter TX,
+    // markOrderPaid in B throws unique-violation from the DB driver.
+    const dataMod = (await import('@/lib/order-paid/data')) as unknown as {
+      markOrderPaid: ReturnType<typeof vi.fn>;
+    };
+    dataMod.markOrderPaid.mockImplementationOnce(() => {
+      const err = new Error('duplicate key value violates unique constraint') as Error & { code: string };
+      err.code = '23505';
+      throw err;
+    });
+    const r = await applyOrderPaid({ orderId: 42, mpPaymentId: 'mp-1', paymentStatus: 'approved' });
+    expect(r.applied).toBe(false);
+    if (r.applied === false) expect(r.reason).toBe('already_applied');
+    // Order should remain in pending state since the simulated DB error happened
+    // before the local mock would have set status='paid' — that's fine; idempotency check is at the route layer.
+  });
+
   it('split FIFO across two batches when first lacks stock', async () => {
     txState.orderItems.get(42)![0].qty = 13;
     txState.orderItems.get(42)![0].lineTotalCents = 13 * 200_000;
