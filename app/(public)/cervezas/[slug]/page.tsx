@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import type { Route } from 'next';
 import Link from 'next/link';
 import { fmtAbv, fmtFormat, fmtPrice, getProductBySlug } from '@/lib/products';
+import { AddToCartButton } from '@/components/public/AddToCartButton';
 
 const ALTITUDES: Record<string, number> = {
   'catedral-ipa-lata': 2405,
@@ -210,14 +211,20 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <span className="text-accent">▲ </span>Envío Bariloche 24 h · Retiro en taproom gratis
               </p>
             </div>
-            <button
-              type="button"
-              disabled
-              title="Carrito disponible en Phase 3"
-              className="bg-accent px-12 py-5 font-display text-[16px] uppercase tracking-[0.06em] text-bg opacity-60"
-            >
-              Próximamente →
-            </button>
+            {minPack ? (
+              <AddToCartButton
+                packId={minPack.id}
+                label={`Agregar · ${fmtPrice(minPack.priceCents)}`}
+              />
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="bg-accent px-12 py-5 font-display text-[16px] uppercase tracking-[0.06em] text-bg opacity-30"
+              >
+                Sin stock
+              </button>
+            )}
           </div>
         </div>
       </section>

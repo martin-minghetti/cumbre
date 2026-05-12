@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { brand } from '@/config/brand';
+import { CartBadge } from './CartBadge';
 
 export function Nav() {
   return (
@@ -15,9 +16,9 @@ export function Nav() {
         <li><Link href={'/visitas' as Route} className="opacity-80 transition hover:text-accent hover:opacity-100">Taproom</Link></li>
         <li><Link href={'/mayorista' as Route} className="opacity-80 transition hover:text-accent hover:opacity-100">Mayorista</Link></li>
       </ul>
-      <span className="border border-line-strong px-4 py-2 font-mono text-[11.5px] uppercase tracking-[0.18em]">
-        Carrito · 0
-      </span>
+      <Link href={'/carrito' as Route} className="flex items-center gap-1 border border-line-strong px-4 py-2 font-mono text-[11.5px] uppercase tracking-[0.18em] transition hover:border-accent hover:text-accent">
+        Carrito · <CartBadge />
+      </Link>
     </nav>
   );
 }
