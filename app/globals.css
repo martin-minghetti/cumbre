@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0A0A0A;
+  --color-paper: #F5F0E8;
+  --color-accent: #C8843A;
+  --color-text: #0A0A0A;
+  --color-text-inverse: #F5F0E8;
+  --color-muted: #737373;
+  --font-display: 'Anton', system-ui, sans-serif;
+  --font-body: 'Geist', system-ui, sans-serif;
+}
+
+html, body {
+  background: var(--color-bg);
+  color: var(--color-text-inverse);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
