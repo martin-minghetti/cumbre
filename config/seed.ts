@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import type { Db } from '@/db';
-import { batches, packDefinitions, products, suppliers, supplies } from '@/db/schema';
+import { batches, packDefinitions, products, stockMovements, suppliers, supplies } from '@/db/schema';
 
 const PRODUCTS = [
   {
@@ -194,12 +194,23 @@ export async function seedAll(db: Db) {
     const b = p.initialBatch;
     const [existingBatch] = await db.select().from(batches).where(eq(batches.lotCode, b.lotCode)).limit(1);
     if (existingBatch) continue;
-    await db.insert(batches).values({
+    const [insertedBatch] = await db.insert(batches).values({
       productId, lotCode: b.lotCode,
       bottledAt: new Date(),
       abv: b.abv, ibu: b.ibu,
       volumeProducedL: b.volume, unitsProduced: b.units,
       costTotalCents: b.costCents, notes: b.notes, status: 'bottled',
+    }).returning({ id: batches.id });
+
+    // Emit positive stock_movement for the seeded batch so available stock = unitsProduced.
+    // Without this, FIFO queries return zero stock and checkout pre-check rejects all orders.
+    await db.insert(stockMovements).values({
+      productId,
+      batchId: insertedBatch.id,
+      delta: b.units,
+      reason: 'production',
+      referenceId: insertedBatch.id,
+      notes: `seed: initial production batch ${b.lotCode}`,
     });
   }
   console.log('[seed] products + packs + batches OK');
