@@ -101,5 +101,69 @@ Tracking wall-clock activos por hito. Honest tracking, no cherry-picking.
 - Tests for FIFO + HMAC webhook signature
 - Login page `/admin/login` (consumer of the redirect param fixed proactively in Task 8)
 
-## Phase 3: Carrito + Checkout + Mercado Pago + Admin login
-TBD. Plan to be written after Phase 2 review.
+## Phase 3: Carrito + Checkout + Mercado Pago + Email + Admin login
+
+- **Start:** 2026-05-12
+- **End:** 2026-05-12 (same session)
+- **Wall-clock estimate:** 2-3h
+- **Actual:** ~3h (subagent-driven across 15 tasks + 2 unplanned infra fixes — seed stock_movements gap and neon-http → neon-serverless driver swap for TX support)
+- **Live URL:** https://cumbre-three.vercel.app
+
+### Tasks
+
+- [x] Task 1: Cart HMAC lib + rate-limit lib (TDD, 13 tests)
+- [x] Task 2: Cart API routes (add/update/remove/clear) with rate-limit
+- [x] Task 3: Cart page + Nav badge + PDP add-to-cart wire-up
+- [x] Task 4: FIFO allocator + stock queries (TDD, 7 tests)
+- [x] Task 5: Shipping zones + checkout totals (TDD, 4 tests)
+- [x] Task 6: Checkout page UI
+- [x] Task 7: order-token + email + order-paid pipeline (TDD with mocked DB, 11 tests)
+- [x] Task 8: /api/checkout/start route + MP preference + cart-clear on success
+- [x] Task 9: MP webhook with HMAC verify, ts freshness 5min, idempotent apply
+- [x] Task 10: Simulated payment flow (approve/reject)
+- [x] Task 11: /checkout/exito page with order-token verification
+- [x] Task 12: /admin/login page consuming safe-redirect helper
+- [x] Task 13: CSP + HSTS + X-CTO + X-Frame-Options security headers
+- [x] Task 14: Playwright E2E (5 tests: happy path + 4 security)
+- [x] Task 15: BUILD_LOG + production deploy
+
+### Tests
+
+- **55 unit/integration** (14 prior + 41 new)
+- **5 Playwright E2E** (happy path purchase journey + tampered token + missing token + admin 307 + open-redirect neutralized)
+
+### Highlights
+
+- Cart cookie HMAC with Web Crypto async (same pattern as session). `MAX_QTY_PER_LINE = 99` clamp.
+- Rate-limit in-memory sliding window per IP/user (cart 60/min, checkout 10/5min, simulated 20/min).
+- FIFO allocator pure function — TDD-covered for single-batch / split / exact-fit / insufficient / empty / qty=0 / order preservation.
+- `applyOrderPaid` pipeline: TX with `SELECT FOR UPDATE` on `batches`, FIFO allocate, insert stock_movements, mark paid. Idempotent via `orders.mp_payment_id` UNIQUE + pg `23505` catch in catch block.
+- Simulated mode default (`PAYMENT_MODE=simulated`) enables demos without MP credentials.
+- Webhook MP: HMAC `x-signature` verify + `ts` freshness 5min + idempotency through DB UNIQUE.
+- Resend graceful fallback: missing `RESEND_API_KEY` logs HTML to console.
+- `escapeHtml` server-side covers all 5 chars (`&<>"'`) before interpolation in email templates.
+- CSP whitelist MP + Resend + self in prod; dev adds `unsafe-eval` + `ws:` + localhost for Turbopack HMR. HSTS preload-ready (2-year max-age) in prod.
+- `/admin/login` consumes `isSafeRelative` from Phase 2 — open-redirect attacks coerced to `/admin`.
+
+### Infra fixes during Phase 3
+
+- **Seed stock_movements gap**: Phase 2 seed inserted batches without emitting positive `stock_movements`, leaving `getBatchesForProductFifo` returning empty and blocking all checkouts. Patched `config/seed.ts` to emit `delta=+unitsProduced, reason='production'` on batch insert + backfilled existing batches via one-off SQL.
+- **DB driver swap (neon-http → neon-serverless)**: neon-http doesn't support transactions. Switched to Pool-based `drizzle-orm/neon-serverless` + `ws` for Node runtime. Required for `applyOrderPaid` (TX + `SELECT FOR UPDATE`) and `startCheckout` (order + items TX).
+
+### Done criteria met
+
+- `pnpm test` → 55 passed
+- `pnpm test:e2e` → 5 passed (happy path + 4 security)
+- `pnpm typecheck` → clean
+- `pnpm build` → clean
+- Production deploy LIVE at https://cumbre-three.vercel.app
+- E2E manual verified on prod: PDP → cart → checkout → simulated approve → exito + DB orders/stock_movements consistent (order #4 paid with simulated-4 + stock movement -1 for batch 1)
+- 5 security headers in prod (CSP, HSTS, X-CTO, X-Frame-Options, Referrer-Policy)
+
+### Out of scope (Phase 4+)
+
+- Admin dashboard + KPIs + alertas
+- CRUD productos / batches / supplies / suppliers / OCs
+- POS + caja diaria + cashier role UI
+- Reportes + cron alertas
+- Real Mercado Pago integration (gated by adding `MP_ACCESS_TOKEN` + `MP_WEBHOOK_SECRET` and flipping `PAYMENT_MODE=production` — code is already wired)
