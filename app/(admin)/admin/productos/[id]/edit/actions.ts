@@ -44,10 +44,15 @@ export async function updateProduct(
   }
 
   try {
-    await db.update(products).set(parsed.data).where(eq(products.id, id));
+    const updated = await db
+      .update(products)
+      .set(parsed.data)
+      .where(eq(products.id, id))
+      .returning({ slug: products.slug });
     revalidatePath('/admin/productos');
     revalidatePath('/cervezas');
-    revalidatePath(`/cervezas/${parsed.data.name}`);
+    const slug = updated[0]?.slug;
+    if (slug) revalidatePath(`/cervezas/${slug}`);
     return { ok: true };
   } catch (e) {
     console.error('[updateProduct] DB error', e);

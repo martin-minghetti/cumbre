@@ -1,12 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const updateMock = vi.fn();
+const returningMock = vi.fn();
 
 vi.mock('@/db', () => ({
   db: {
     update: () => ({
       set: () => ({
-        where: updateMock,
+        where: () => ({
+          returning: returningMock,
+        }),
       }),
     }),
   },
@@ -41,16 +43,27 @@ function buildFormData(overrides: Record<string, string | boolean> = {}) {
 
 describe('updateProduct action', () => {
   beforeEach(() => {
-    updateMock.mockReset();
+    returningMock.mockReset();
     (revalidatePath as any).mockReset();
   });
 
-  it('returns ok when valid data + revalidates 3 paths', async () => {
-    updateMock.mockResolvedValue(undefined);
+  it('returns ok when valid data + revalidates 3 paths (admin/productos, /cervezas, /cervezas/<slug>)', async () => {
+    returningMock.mockResolvedValue([{ slug: 'ipa-cumbre' }]);
     const fd = buildFormData();
     const r = await updateProduct({}, fd);
     expect(r.ok).toBe(true);
     expect(revalidatePath).toHaveBeenCalledTimes(3);
+    expect(revalidatePath).toHaveBeenCalledWith('/admin/productos');
+    expect(revalidatePath).toHaveBeenCalledWith('/cervezas');
+    expect(revalidatePath).toHaveBeenCalledWith('/cervezas/ipa-cumbre');
+  });
+
+  it('skips slug revalidate when product no longer exists', async () => {
+    returningMock.mockResolvedValue([]);
+    const fd = buildFormData();
+    const r = await updateProduct({}, fd);
+    expect(r.ok).toBe(true);
+    expect(revalidatePath).toHaveBeenCalledTimes(2);
     expect(revalidatePath).toHaveBeenCalledWith('/admin/productos');
     expect(revalidatePath).toHaveBeenCalledWith('/cervezas');
   });
@@ -65,7 +78,7 @@ describe('updateProduct action', () => {
   });
 
   it('returns generic error when DB throws', async () => {
-    updateMock.mockRejectedValue(new Error('connection lost'));
+    returningMock.mockRejectedValue(new Error('connection lost'));
     const fd = buildFormData();
     const r = await updateProduct({}, fd);
     expect(r.ok).toBe(false);
