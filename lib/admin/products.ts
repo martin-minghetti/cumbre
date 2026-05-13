@@ -11,7 +11,11 @@ export const ProductUpdateSchema = z.object({
   ibuDefault: z.number().int().min(0).max(200).nullable(),
   description: z.string().nullable(),
   heroImageUrl: z
-    .union([z.string().url(), z.literal('')])
+    .union([
+      z.string().url(),
+      z.string().regex(/^\/[^\s]*$/, 'Must be a URL or a path starting with /'),
+      z.literal(''),
+    ])
     .nullable()
     .transform((v) => (v === '' ? null : v)),
   reorderPoint: z.number().int().min(0),

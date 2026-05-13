@@ -52,7 +52,7 @@ describe('ProductUpdateSchema', () => {
     expect(r.success).toBe(true);
   });
 
-  it('rejects heroImageUrl that is not a URL', () => {
+  it('rejects heroImageUrl that is not a URL nor a relative path', () => {
     const r = ProductUpdateSchema.safeParse({ ...valid, heroImageUrl: 'not-a-url' });
     expect(r.success).toBe(false);
   });
@@ -60,5 +60,21 @@ describe('ProductUpdateSchema', () => {
   it('accepts empty heroImageUrl (optional)', () => {
     const r = ProductUpdateSchema.safeParse({ ...valid, heroImageUrl: '' });
     expect(r.success).toBe(true);
+  });
+
+  it('accepts relative path heroImageUrl (e.g. /products/foo.jpg)', () => {
+    const r = ProductUpdateSchema.safeParse({
+      ...valid,
+      heroImageUrl: '/products/campanario-packshot.jpg',
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it('rejects relative path with whitespace', () => {
+    const r = ProductUpdateSchema.safeParse({
+      ...valid,
+      heroImageUrl: '/products/foo bar.jpg',
+    });
+    expect(r.success).toBe(false);
   });
 });
