@@ -1,10 +1,14 @@
 import type { ReactNode } from 'react';
+import { Geist } from 'next/font/google';
+import { cn } from '@/lib/utils';
 
 import '../globals.css';
 
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
+
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="admin-shell min-h-screen bg-background text-foreground">
+    <div className={cn('admin-shell font-sans min-h-screen bg-background text-foreground', geist.variable)}>
       {children}
     </div>
   );
