@@ -1,0 +1,161 @@
+/*
+ * Admin-scoped global styles for Cumbre Phase 4 fundación.
+ *
+ * IMPORTANT: This file is imported ONLY from app/(admin)/admin/layout.tsx
+ * so it ships exclusively on /admin/* routes. The public site (app/(public)/*)
+ * keeps its alpine editorial paleta intact (see app/globals.css).
+ *
+ * Theme: shadcn/ui — Zinc base (HSL) + cobre primary accent (#B87333 ≈ 28 64% 46%).
+ * shadcn install was originally written into app/globals.css by `shadcn init`,
+ * but that broke the public site (it pinned body { bg-background } to white).
+ * We restored app/globals.css and moved all shadcn tokens here.
+ */
+
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Expose shadcn tokens as Tailwind utilities (bg-primary, text-foreground, etc).
+   @theme inline is project-wide at build time; the underlying CSS vars only
+   resolve where this file is loaded (admin shell). */
+@theme inline {
+  --font-heading: var(--font-sans);
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/*
+ * Zinc base (HSL) + cobre #B87333 primary.
+ * Scoped to .admin-shell so this never leaks into the public site even if
+ * the file were ever loaded on a public route by mistake.
+ */
+.admin-shell {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+  --primary: 28 64% 46%;            /* cobre #B87333 */
+  --primary-foreground: 0 0% 100%;  /* white */
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 28 64% 46%;               /* cobre */
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+  --radius: 0.5rem;
+  --sidebar: 240 4.8% 97.9%;
+  --sidebar-foreground: 240 10% 3.9%;
+  --sidebar-primary: 28 64% 46%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 4.8% 95.9%;
+  --sidebar-accent-foreground: 240 5.9% 10%;
+  --sidebar-border: 240 5.9% 90%;
+  --sidebar-ring: 28 64% 46%;
+}
+
+.admin-shell.dark,
+.dark .admin-shell {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 28 60% 55%;            /* cobre brighter on dark */
+  --primary-foreground: 0 0% 10%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 28 60% 55%;
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+  --sidebar: 240 5.9% 10%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 28 60% 55%;
+  --sidebar-primary-foreground: 0 0% 10%;
+  --sidebar-accent: 240 3.7% 15.9%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-ring: 28 60% 55%;
+}
+
+/* Reset borders + base body styles ONLY inside admin shell.
+   We avoid the global `* { border-color: ... }` reset that ships with vanilla
+   shadcn — it would override the public site if these rules ever leaked. */
+@layer base {
+  .admin-shell,
+  .admin-shell * {
+    border-color: hsl(var(--border));
+  }
+  .admin-shell {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+  }
+}
+/*
+ * Note: `npx shadcn add sidebar` appends unscoped :root and .dark blocks
+ * with sidebar tokens by default. We deleted them after install since the
+ * .admin-shell scope above already defines those tokens (with cobre primary).
+ * Leaving them would set --sidebar=hsl(hsl(...)) [double-wrapped, broken]
+ * and pollute the public site's :root.
+ */

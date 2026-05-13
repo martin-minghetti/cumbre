@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react';
 
+import '../globals.css';
+
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-bg text-text-inverse">
+    <div className="admin-shell min-h-screen bg-background text-foreground">
       {children}
     </div>
   );
