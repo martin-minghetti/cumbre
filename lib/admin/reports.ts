@@ -93,17 +93,19 @@ export type CriticalRow = { kind: 'product' | 'supply'; id: number; name: string
 
 export async function getCriticalStockProducts(): Promise<CriticalRow[]> {
   const r = await db.execute(sql`
-    SELECT 'product' AS kind, p.id, p.name,
-      COALESCE((SELECT SUM(delta) FROM stock_movements WHERE product_id = p.id), 0)::int AS stock,
-      p.reorder_point AS "reorderPoint",
-      NULL::text AS unit
-    FROM products p
-    WHERE p.active = true
-      AND COALESCE((SELECT SUM(delta) FROM stock_movements WHERE product_id = p.id), 0) < p.reorder_point
-    UNION ALL
-    SELECT 'supply' AS kind, s.id, s.name, s.current_qty AS stock, s.reorder_point AS "reorderPoint", s.unit
-    FROM supplies s
-    WHERE s.current_qty < s.reorder_point
+    SELECT * FROM (
+      SELECT 'product' AS kind, p.id, p.name,
+        COALESCE((SELECT SUM(delta) FROM stock_movements WHERE product_id = p.id), 0)::int AS stock,
+        p.reorder_point AS "reorderPoint",
+        NULL::text AS unit
+      FROM products p
+      WHERE p.active = true
+        AND COALESCE((SELECT SUM(delta) FROM stock_movements WHERE product_id = p.id), 0) < p.reorder_point
+      UNION ALL
+      SELECT 'supply' AS kind, s.id, s.name, s.current_qty AS stock, s.reorder_point AS "reorderPoint", s.unit
+      FROM supplies s
+      WHERE s.current_qty < s.reorder_point
+    ) sub
     ORDER BY (stock::float / NULLIF("reorderPoint", 0)) ASC NULLS LAST
   `);
   return r.rows.map((row) => {
