@@ -23,7 +23,7 @@ export async function listOnlineOrders(filters: OrderFilters = {}): Promise<Orde
   const conds: ReturnType<typeof sql>[] = [];
   if (filters.status) conds.push(sql`o.status = ${filters.status}`);
   if (filters.fromDate) conds.push(sql`o.created_at >= ${filters.fromDate}`);
-  if (filters.toDate) conds.push(sql`o.created_at <= ${filters.toDate}`);
+  if (filters.toDate) conds.push(sql`o.created_at < (${filters.toDate}::date + INTERVAL '1 day')`);
 
   const where = conds.length > 0
     ? sql.join([sql`WHERE`, sql.join(conds, sql` AND `)], sql` `)
@@ -100,6 +100,10 @@ export async function getOrderDetail(orderId: number): Promise<OrderDetail | nul
   if (head.rows.length === 0) return null;
   const h = head.rows[0] as Record<string, unknown>;
 
+  // Lot codes are aggregated at the (order, product) level via stock_movements.reference_id.
+  // If an order has multiple order_items for the same product (e.g., unit + pack of same beer),
+  // each row will show the union of all lots consumed by that product on the order.
+  // Acceptable for the demo scope — proper per-item lot association would require schema change.
   const items = await db.execute(sql`
     SELECT oi.id, p.name AS "productName", pd.size AS "packSize", oi.qty,
       oi.unit_price_cents AS "unitPriceCents", oi.line_total_cents AS "lineTotalCents",
