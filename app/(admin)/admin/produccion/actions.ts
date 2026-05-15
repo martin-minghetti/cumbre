@@ -13,7 +13,9 @@ export async function produceBatchAction(_prev: unknown, formData: FormData): Pr
   const cookieStore = await cookies();
   const token = cookieStore.get('session')?.value ?? null;
   const session = token ? await verifySession(token) : null;
-  const createdBy = session?.userId ?? 1;
+
+  if (!session) return { ok: false, errors: [{ message: 'no auth' }] };
+  const createdBy = session.userId;
 
   const productId = Number(formData.get('productId'));
   const lotCode = String(formData.get('lotCode') ?? '').trim();
