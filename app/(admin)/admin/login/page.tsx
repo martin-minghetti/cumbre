@@ -1,31 +1,50 @@
-import { brand } from '@/config/brand';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { isSafeRelative } from '@/lib/safe-redirect';
-import { LoginForm } from '@/components/admin/LoginForm';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminLoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string }>;
+  searchParams: Promise<{ redirect?: string; error?: string }>;
 }) {
-  const { redirect: rawRedirect } = await searchParams;
-  const redirectTo = isSafeRelative(rawRedirect) ? rawRedirect! : '/admin';
+  const sp = await searchParams;
+  const redirect = sp.redirect && isSafeRelative(sp.redirect) ? sp.redirect : '/admin';
+  const error = sp.error;
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-9 py-16">
-      <div className="border border-line p-10">
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent">— admin</p>
-        <h1 className="mt-4 font-display text-[clamp(36px,5vw,56px)] uppercase leading-[0.9] tracking-[-0.01em]">
-          {brand.name}
-        </h1>
-        <p className="mt-2 font-body text-text-inverse/70">
-          Iniciá sesión para gestionar tu cervecería.
-        </p>
-        <div className="mt-8">
-          <LoginForm redirectTo={redirectTo} />
-        </div>
-      </div>
-    </main>
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle className="text-2xl">
+          Cumbre <span className="text-primary">Admin</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form action="/api/auth/login" method="post" className="space-y-4">
+          <input type="hidden" name="redirect" value={redirect} />
+          <div className="space-y-1">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" name="email" type="email" required autoComplete="email" />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              required
+              autoComplete="current-password"
+            />
+          </div>
+          {error ? <p className="text-sm text-red-600">Credenciales invalidas.</p> : null}
+          <Button type="submit" className="w-full">
+            Entrar
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

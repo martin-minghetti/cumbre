@@ -12,6 +12,7 @@ const envSchema = z.object({
   MP_WEBHOOK_SECRET: z.string().optional(),
   PAYMENT_MODE: z.enum(['simulated', 'production']).default('simulated'),
   RESEND_API_KEY: z.string().optional(),
+  CRON_SECRET: z.string().min(16).optional(),
   REPLICATE_API_TOKEN: z.string().optional(),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });
