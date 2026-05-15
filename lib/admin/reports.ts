@@ -106,20 +106,30 @@ export async function getCriticalStockProducts(): Promise<CriticalRow[]> {
     WHERE s.current_qty < s.reorder_point
     ORDER BY (stock::float / NULLIF(reorder_point, 0)) ASC NULLS LAST
   `);
-  return r.rows as CriticalRow[];
+  return r.rows.map((row) => {
+    const o = row as Record<string, unknown>;
+    return {
+      kind: o.kind as 'product' | 'supply',
+      id: Number(o.id),
+      name: String(o.name),
+      stock: Number(o.stock),
+      reorderPoint: Number(o.reorderPoint),
+      unit: o.unit == null ? undefined : String(o.unit),
+    };
+  });
 }
 
 export type SalesByDayRow = { day: string; orders: number; totalCents: number };
 
 export async function getSalesByPeriod(rangeDays = 30): Promise<SalesByDayRow[]> {
   const r = await db.execute(sql`
-    SELECT to_char(date_trunc('day', o.created_at), 'YYYY-MM-DD') AS day,
+    SELECT to_char(date_trunc('day', o.created_at AT TIME ZONE 'America/Argentina/Buenos_Aires'), 'YYYY-MM-DD') AS day,
       COUNT(*)::int AS orders,
       SUM(o.total_cents)::bigint AS "totalCents"
     FROM orders o
     WHERE o.status IN ('paid', 'fulfilled')
       AND o.created_at >= NOW() - (${rangeDays} || ' days')::interval
-    GROUP BY day
+    GROUP BY to_char(date_trunc('day', o.created_at AT TIME ZONE 'America/Argentina/Buenos_Aires'), 'YYYY-MM-DD')
     ORDER BY day ASC
   `);
   return r.rows.map((row) => {
