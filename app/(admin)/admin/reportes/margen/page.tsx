@@ -1,6 +1,8 @@
 import { getMarginByProduct } from '@/lib/admin/reports';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
+export const dynamic = 'force-dynamic';
+
 const fmt = (c: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(c / 100);
 
 export default async function MargenPage() {

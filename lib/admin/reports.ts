@@ -104,7 +104,7 @@ export async function getCriticalStockProducts(): Promise<CriticalRow[]> {
     SELECT 'supply' AS kind, s.id, s.name, s.current_qty AS stock, s.reorder_point AS "reorderPoint", s.unit
     FROM supplies s
     WHERE s.current_qty < s.reorder_point
-    ORDER BY (stock::float / NULLIF(reorder_point, 0)) ASC NULLS LAST
+    ORDER BY (stock::float / NULLIF("reorderPoint", 0)) ASC NULLS LAST
   `);
   return r.rows.map((row) => {
     const o = row as Record<string, unknown>;
