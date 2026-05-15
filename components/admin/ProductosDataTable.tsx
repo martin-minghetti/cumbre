@@ -70,9 +70,9 @@ const columns: ColumnDef<ProductRow>[] = [
     cell: ({ row }) => {
       const abv = row.original.abvDefault;
       const ibu = row.original.ibuDefault;
-      const abvStr = abv == null ? '—' : `${(abv / 10).toFixed(1)}%`;
-      const ibuStr = ibu == null ? '—' : String(ibu);
-      return <span className="tabular-nums">{abvStr} · {ibuStr}</span>;
+      const abvStr = abv == null ? 'N/A' : `${(abv / 10).toFixed(1)}%`;
+      const ibuStr = ibu == null ? 'N/A' : String(ibu);
+      return <span className="tabular-nums">{abvStr} / {ibuStr}</span>;
     },
   },
   {
@@ -117,7 +117,7 @@ const columns: ColumnDef<ProductRow>[] = [
             : 'bg-gray-100 text-gray-600')
         }
       >
-        {row.original.active ? 'Sí' : 'No'}
+        {row.original.active ? 'Si' : 'No'}
       </span>
     ),
   },
@@ -134,6 +134,17 @@ const columns: ColumnDef<ProductRow>[] = [
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
             <Link href={`/admin/productos/${row.original.id}/edit` as Route}>Editar</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={async () => {
+              if (!confirm('Desactivar este producto? No aparecera en el catalogo publico.')) return;
+              const r = await fetch(`/admin/productos/${row.original.id}/delete`, { method: 'POST' });
+              if (r.ok) location.reload();
+              else alert('Error al desactivar');
+            }}
+            className="text-red-600"
+          >
+            Desactivar
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
