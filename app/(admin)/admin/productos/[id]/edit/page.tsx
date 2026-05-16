@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getProductById } from '@/lib/admin/products';
 import { ProductForm } from '@/components/admin/ProductForm';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 
 export default async function EditProductPage({
   params,
@@ -15,11 +16,12 @@ export default async function EditProductPage({
   if (!product) notFound();
 
   return (
-    <div className="p-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">{product.name}</h1>
-        <p className="text-sm text-muted-foreground">Editar producto</p>
-      </header>
+    <div className="p-8 space-y-8">
+      <AdminPageHeader
+        eyebrow="Catalogo / Editar producto"
+        title={product.name.toUpperCase()}
+        subtitle="Editor del producto. Cambios se publican al guardar."
+      />
       <ProductForm product={product} />
     </div>
   );

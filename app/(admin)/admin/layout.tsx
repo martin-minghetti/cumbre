@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { Geist } from 'next/font/google';
 import { cn } from '@/lib/utils';
@@ -17,15 +18,15 @@ export const metadata = {
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const user = await currentUser();
-  if (!user) redirect('/admin-login');
+  if (!user) redirect('/admin-login' as Route);
   return (
     <div className={cn('admin-shell font-sans min-h-screen', geist.variable)}>
       <SidebarProvider>
         <AppSidebar userRole={user.role} />
         <main className="flex-1 flex flex-col bg-background text-foreground">
-          <header className="border-b p-3 flex items-center gap-3">
+          <header className="border-b border-border/60 px-4 py-3 flex items-center gap-3">
             <SidebarTrigger />
-            <span className="text-sm text-muted-foreground">Cumbre · Admin</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Cumbre / Admin / {user.role}</span>
           </header>
           <div className="flex-1">{children}</div>
           <Toaster />

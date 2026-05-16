@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getPosSaleDetail } from '@/lib/admin/unified-sales';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const dynamic = 'force-dynamic';
@@ -11,15 +12,21 @@ export default async function PosSaleDetailPage({ params }: { params: Promise<{ 
   if (!detail) notFound();
 
   return (
-    <div className="p-8 space-y-6 max-w-3xl">
+    <div className="p-8 space-y-8 max-w-3xl">
+      <AdminPageHeader
+        eyebrow={`Operaciones / Venta POS #${detail.sale.id}`}
+        title={`POS #${detail.sale.id}`}
+        subtitle={`Cajero ${detail.sale.cashierName}, sesion #${detail.sale.cashSessionId}.`}
+      />
+
       <Card>
-        <CardHeader><CardTitle>Venta POS #{detail.sale.id}</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Resumen</CardTitle></CardHeader>
         <CardContent className="space-y-1 text-sm">
           <p>Cajero: {detail.sale.cashierName}</p>
-          <p>Fecha: {new Date(detail.sale.createdAt).toLocaleString('es-AR')}</p>
+          <p>Fecha: <span className="tabular-nums">{new Date(detail.sale.createdAt).toLocaleString('es-AR')}</span></p>
           <p>Metodo: {detail.sale.paymentMethod}</p>
-          <p>Sesion: #{detail.sale.cashSessionId}</p>
-          <p className="text-lg font-semibold">{fmt(detail.sale.totalCents)}</p>
+          <p>Sesion: <span className="font-mono tabular-nums">#{detail.sale.cashSessionId}</span></p>
+          <p className="text-lg font-semibold font-mono tabular-nums">{fmt(detail.sale.totalCents)}</p>
         </CardContent>
       </Card>
 
@@ -37,9 +44,9 @@ export default async function PosSaleDetailPage({ params }: { params: Promise<{ 
                 <tr key={it.id} className="border-t">
                   <td>{it.productName}</td>
                   <td>{it.packSize === 1 ? 'unidad' : `x${it.packSize}`}</td>
-                  <td>{it.qty}</td>
-                  <td className="text-right tabular-nums">{fmt(it.unitPriceCents)}</td>
-                  <td className="text-right tabular-nums">{fmt(it.lineTotalCents)}</td>
+                  <td className="tabular-nums">{it.qty}</td>
+                  <td className="text-right font-mono tabular-nums">{fmt(it.unitPriceCents)}</td>
+                  <td className="text-right font-mono tabular-nums">{fmt(it.lineTotalCents)}</td>
                   <td className="font-mono text-xs">{it.batchLotCodes.join(', ') || 's/d'}</td>
                 </tr>
               ))}
