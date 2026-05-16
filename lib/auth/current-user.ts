@@ -15,11 +15,11 @@ export type CurrentUser = {
 
 export async function currentUser(): Promise<CurrentUser | null> {
   const jar = await cookies();
-  const tok = jar.get('session')?.value;
-  if (!tok) return null;
-  const sess = await verifySession(tok);
-  if (!sess) return null;
-  const [u] = await db.select().from(users).where(eq(users.id, sess.userId)).limit(1);
-  if (!u || !u.active) return null;
-  return { id: u.id, email: u.email, role: u.role, name: u.name, active: u.active };
+  const token = jar.get('session')?.value;
+  if (!token) return null;
+  const session = await verifySession(token);
+  if (!session) return null;
+  const [user] = await db.select().from(users).where(eq(users.id, session.userId)).limit(1);
+  if (!user || !user.active) return null;
+  return { id: user.id, email: user.email, role: user.role, name: user.name, active: user.active };
 }
