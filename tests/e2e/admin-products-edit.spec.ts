@@ -5,7 +5,7 @@ const OWNER_PASSWORD = process.env.INITIAL_OWNER_PASSWORD!;
 
 test('owner can edit a product and see the change in list', async ({ page }) => {
   // 1. Login
-  await page.goto('/admin/login');
+  await page.goto('/admin-login');
   // The login form uses <label><span>Email</span><input/></label> — implicit label.
   // Use locator('label', hasText) → input to be robust.
   await page.locator('label', { hasText: /^Email$/i }).locator('input').fill(OWNER_EMAIL);

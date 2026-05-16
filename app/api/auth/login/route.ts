@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
   if (!email || !password) {
     if (isForm) {
-      const url = new URL('/admin/login', req.url);
+      const url = new URL('/admin-login', req.url);
       url.searchParams.set('error', '1');
       url.searchParams.set('redirect', redirectTo);
       return NextResponse.redirect(url, 303);
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
   const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
   if (!user || !user.active) {
     if (isForm) {
-      const url = new URL('/admin/login', req.url);
+      const url = new URL('/admin-login', req.url);
       url.searchParams.set('error', '1');
       url.searchParams.set('redirect', redirectTo);
       return NextResponse.redirect(url, 303);
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
   const ok = await verifyPassword(password, user.passwordHash);
   if (!ok) {
     if (isForm) {
-      const url = new URL('/admin/login', req.url);
+      const url = new URL('/admin-login', req.url);
       url.searchParams.set('error', '1');
       url.searchParams.set('redirect', redirectTo);
       return NextResponse.redirect(url, 303);

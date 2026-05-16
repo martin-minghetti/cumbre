@@ -8,7 +8,7 @@ export async function middleware(req: NextRequest) {
   // Allow public auth endpoints
   if (pathname.startsWith('/api/auth')) return NextResponse.next();
   // Allow admin login page itself
-  if (pathname === '/admin/login') return NextResponse.next();
+  if (pathname === '/admin-login') return NextResponse.next();
 
   const isAdmin = pathname.startsWith('/admin');
   const isPos = pathname.startsWith('/pos');
@@ -19,7 +19,7 @@ export async function middleware(req: NextRequest) {
 
   if (!session) {
     const url = req.nextUrl.clone();
-    url.pathname = '/admin/login';
+    url.pathname = '/admin-login';
     if (isSafeRelative(pathname)) {
       url.searchParams.set('redirect', pathname);
     }
