@@ -2,8 +2,8 @@ import { notFound } from 'next/navigation';
 import type { Route } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { fmtAbv, fmtFormat, fmtPrice, getProductBySlug } from '@/lib/products';
-import { AddToCartButton } from '@/components/public/AddToCartButton';
+import { fmtAbv, fmtFormat, getProductBySlug } from '@/lib/products';
+import { BuyBlock } from '@/components/public/BuyBlock';
 
 const ALTITUDES: Record<string, number> = {
   'catedral-ipa-lata': 2405,
@@ -39,30 +39,6 @@ function BatchCell({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SelectGroup({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-2.5">
-      <span className="font-mono text-[10.5px] uppercase tracking-[0.22em] text-muted">{label}</span>
-      <div className="flex gap-2">{children}</div>
-    </div>
-  );
-}
-
-function SelectOption({ label, sub, active }: { label: string; sub: string; active?: boolean }) {
-  return (
-    <button
-      type="button"
-      disabled
-      className={`flex-1 border px-3 py-3.5 text-center font-display text-[18px] uppercase tracking-[0.01em] transition ${
-        active ? 'border-accent bg-accent text-bg' : 'border-line text-text-inverse'
-      } opacity-60`}
-      title="Selector activo en Phase 3"
-    >
-      {label}
-      <small className="mt-0.5 block font-mono text-[10px] tracking-[0.18em] opacity-70">{sub}</small>
-    </button>
-  );
-}
 
 function TastingItem({ num, title, body }: { num: string; title: string; body: string }) {
   return (
@@ -83,7 +59,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   const altitude = ALTITUDES[product.slug];
   const tasting = DEFAULT_TASTING;
-  const minPack = product.packs[0];
 
   return (
     <>
@@ -165,42 +140,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             <Spec label="Altitud" value={altitude ? `${altitude} m` : '—'} />
           </dl>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <SelectGroup label="Formato">
-              <SelectOption active label="Lata" sub="473 ml" />
-              <SelectOption label="Porrón" sub="1 L" />
-            </SelectGroup>
-            <SelectGroup label="Pack">
-              <SelectOption active label="Unidad" sub="×1" />
-              <SelectOption label="Pack 6" sub="−12%" />
-            </SelectGroup>
-          </div>
-
-          <div className="grid grid-cols-[1fr_auto] items-end gap-8 border-t border-line pt-[18px]">
-            <div>
-              <div className="font-display text-[64px] leading-[1] tracking-[0.005em]">
-                {minPack ? fmtPrice(minPack.priceCents) : '—'}
-                <small className="ml-1.5 font-mono text-[12px] uppercase tracking-[0.2em] text-muted">ARS</small>
-              </div>
-              <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-                <span className="text-accent">▲ </span>Envío Bariloche 24 h · Retiro en taproom gratis
-              </p>
-            </div>
-            {minPack ? (
-              <AddToCartButton
-                packId={minPack.id}
-                label={`Agregar · ${fmtPrice(minPack.priceCents)}`}
-              />
-            ) : (
-              <button
-                type="button"
-                disabled
-                className="bg-accent px-12 py-5 font-display text-[16px] uppercase tracking-[0.06em] text-bg opacity-30"
-              >
-                Sin stock
-              </button>
-            )}
-          </div>
+          <BuyBlock packs={product.packs} />
         </div>
       </section>
 
