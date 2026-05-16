@@ -314,3 +314,10 @@ Tracking wall-clock activos por hito. Honest tracking, no cherry-picking.
 - `pnpm build` clean
 - Production deploy LIVE https://cumbre-three.vercel.app
 - Smoke visual via agent-browser: home, catalog, PDPs (Tronador, Laguna Negra, Jakob), carrito, checkout, admin-login todos OK
+
+## Phase 5: POS + Caja + Cashier UI
+
+- **Start:** 2026-05-16
+- **End:** TBD
+- **Wall-clock estimate:** 3-4h
+- **Actual:** TBD
