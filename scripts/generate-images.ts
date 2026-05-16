@@ -63,21 +63,22 @@ const IMAGES: Spec[] = [
       'copper rim light tracing the can. ' + STYLE_PACKSHOT,
   },
   {
-    slug: 'products/piltri-packshot',
+    slug: 'products/laguna-negra-packshot',
     aspect: '3:4',
     prompt:
-      'A single 1 liter brown glass long-neck bottle (porron format) standing vertical, matte black background, ' +
-      'minimalist neck and body label, "CUMBRE" in bold copper display sans-serif and "PILTRIQUITRÓN" smaller, ' +
-      'amber glass with golden ale glow visible through, soft warm gold accent stripe, ' +
-      'copper rim light highlighting the bottle silhouette. ' + STYLE_PACKSHOT,
+      'A single 1 liter dark brown glass long-neck bottle (porron format) standing vertical, matte black background, ' +
+      'minimalist body label centered with two lines of text: "CUMBRE" on top in bold copper display sans-serif, "LAGUNA NEGRA" below in smaller letters, ' +
+      'almost opaque very dark brown bottle glass, schwarzbier black lager style, ' +
+      'small amount of dense black foam visible at the bottle neck, deep shadow tones, ' +
+      'copper rim light tracing the bottle silhouette from upper right. ' + STYLE_PACKSHOT,
   },
   {
-    slug: 'products/campanario-packshot',
+    slug: 'products/jakob-packshot',
     aspect: '3:4',
     prompt:
       'A single craft beer aluminum can 473ml standing vertical, matte black background, ' +
-      'minimalist label centered, "CUMBRE" in bold copper display sans-serif and "CAMPANARIO" below smaller, ' +
-      'deep chocolate brown accent stripe, american porter style, fine condensation droplets, ' +
+      'minimalist label centered with two lines of text: "CUMBRE" on top in bold copper display sans-serif, "JAKOB" below in smaller letters, ' +
+      'deep chocolate brown accent stripe near the bottom of the label, american porter style, fine condensation droplets, ' +
       'copper rim light from upper right. ' + STYLE_PACKSHOT,
   },
   {

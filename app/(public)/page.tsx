@@ -12,8 +12,8 @@ const ALTITUDES: Record<string, number> = {
   'tronador-stout-porron': 3554,
   'lopez-helles-lata': 2076,
   'frey-pilsner-lata': 1837,
-  'piltri-golden-porron': 2284,
-  'campanario-porter-lata': 1980,
+  'laguna-negra-schwarzbier-porron': 1670,
+  'jakob-porter-lata': 2030,
 };
 
 function HeroMeta({ label, children }: { label: string; children: React.ReactNode }) {

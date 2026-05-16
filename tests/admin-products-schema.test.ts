@@ -65,7 +65,7 @@ describe('ProductUpdateSchema', () => {
   it('accepts relative path heroImageUrl (e.g. /products/foo.jpg)', () => {
     const r = ProductUpdateSchema.safeParse({
       ...valid,
-      heroImageUrl: '/products/campanario-packshot.jpg',
+      heroImageUrl: '/products/jakob-packshot.jpg',
     });
     expect(r.success).toBe(true);
   });
