@@ -11,14 +11,15 @@ export default async function MargenPage() {
   const rows = await getMarginByProduct(30);
   return (
     <div className="p-8 space-y-8">
-      <div className="rounded-md border border-amber-500/40 bg-amber-50 dark:bg-amber-950/20 p-3 text-xs">
-        Nota: margen calculado solo sobre ventas online. POS no incluido en este reporte (proxima iteracion).
-      </div>
       <AdminPageHeader
         eyebrow="Analisis / Margen"
         title="Margen por producto"
         subtitle="Ultimos 30 dias, costo promedio por unidad producida."
       />
+      <div className="rounded-md border-l-4 border-amber-500 bg-amber-500/10 p-3 text-xs flex items-start gap-2">
+        <span className="font-mono uppercase tracking-wider text-amber-700 text-[10px] mt-0.5">Aviso</span>
+        <p className="text-amber-900 dark:text-amber-100">Margen calculado solo sobre ventas online. POS no incluido en este reporte (proxima iteracion).</p>
+      </div>
       {rows.length === 0 ? (
         <EmptyState
           title="Sin datos de margen"

@@ -43,7 +43,7 @@ export function PosGrid({ catalog, cashSessionId }: { catalog: PosCatalogRow[]; 
   }
 
   return (
-    <div className="grid grid-cols-[1fr_360px] h-[calc(100vh-3rem)]">
+    <div className="grid grid-cols-[1fr_360px] h-full">
       <section className="overflow-y-auto p-4">
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {catalog.map((p) => (
