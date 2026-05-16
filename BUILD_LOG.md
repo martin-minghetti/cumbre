@@ -265,3 +265,52 @@ Tracking wall-clock activos por hito. Honest tracking, no cherry-picking.
 - Real Mercado Pago integration (gated por `MP_ACCESS_TOKEN` + `MP_WEBHOOK_SECRET` + `PAYMENT_MODE=production`)
 - E2E `admin-slice-2.spec.ts` (skipeado este slice — los manual smokes + 116 unit tests cubren)
 - POS-channel ventas (la columna `channel` en orders ya esta pero solo online filtered en slice 2)
+
+## Phase 4 polish: imagenes reales + selectores + tasting + login + bug bundle env
+
+- **Start:** 2026-05-15
+- **End:** 2026-05-16
+- **Wall-clock estimate:** 1.5-2h
+- **Actual:** ~3h (extra por bug bundle env Zod en hydration, login nested layout fix, Tailwind v4 theme-inline issue)
+
+### Highlights
+
+- 8 imagenes FLUX 1.1 Pro via Replicate: 6 packshots 3:4 estilo editorial copper rim light + hero panoramico + og social. Total 461 KB. Costo ~$0.32. scripts/generate-images.ts preserva los prompts.
+- Rename productos: Piltriquitron a Laguna Negra (Schwarzbier porron 1L) por geografia (Bolson, no Bariloche). Campanario a Jakob (American Porter mantiene style). UPDATE coordinado en products + pack_definitions + batches.
+- BuyBlock client component reemplaza el placeholder PACK disabled de Phase 3. Estado useState del pack seleccionado, descuento real computed por producto, precio + CTA dinamicos, POST a /api/cart/add con packId correcto. FORMATO selector dual eliminado (enganoso, cada beer tiene formato exclusivo).
+- lib/tasting.ts con map por slug: 6 tasting notes apropiados al style en lugar del DEFAULT generico de IPA que aplicaba literal a Schwarzbier, Porter, Helles, etc.
+- Checkout copy condicional segun env.PAYMENT_MODE: "Te redirigimos a Mercado Pago" si production, "Demo: pantalla simulada" si simulated.
+- Login admin de `/admin/login` a `/admin-login` (out of route group `(admin)`) porque nested `<html>` en Next 16 rompe. Layout standalone con admin-shell dark + bg-accent button.
+
+### Bugs detected during testing + fixed in session
+
+1. **PDP 'This page couldn't load' en prod**: BuyBlock 'use client' importaba fmtPrice de `@/lib/products` que arrastraba `@/db` y `@/lib/env` al bundle browser. envSchema.parse(process.env) en module evaluation crasheaba en hydration (process.env vacio en browser, Zod throw, React error.tsx). Server SSR daba 200, smoke curl pasaba. Solo agent-browser revelo el error. Fix: `lib/format.ts` con formatters puros sin db/env imports. Lesson firmed: smoke con browser (no solo HTTP) post-deploy.
+2. **Login layout roto**: nested `<html>` en `app/(admin)/admin/login/layout.tsx` dentro del parent `(admin)/layout.tsx` no funciona en Next 16. White panel + off-center + sidebar leaking. Fix: mover a `app/admin-login/` fuera del route group con layout propio.
+3. **Login button bg-primary transparent**: Tailwind v4 solo genera utilities desde archivos con `@import "tailwindcss"`. `app/(admin)/globals.css` solo importa `tw-animate-css`. Su `@theme inline { --color-primary: ... }` nunca compila a `.bg-primary`. Fix pragmatico: button usa `bg-accent` del public globals (cobre `#C8843A`).
+4. **Vercel CLI env add con pipe stdin**: `echo "$SECRET" | vercel env add VAR production` setea valor vacio silencioso. Fix: flag `--value="..."` explicito.
+5. **Campanario sin imagen**: hero_image_url NULL en DB para id=6 (seed insertaba pero no updateaba si ya existia). Fix: UPDATE.
+6. **Lote stale en Laguna Negra**: tras rename, DB seguia con lot_code GLD del Golden Ale original. Fix: UPDATE batches.
+
+### Falso positivo
+
+"Cards de home aparecen negras" NO era bug. Era lazy loading default de Next Image. IntersectionObserver no se triggerea por screenshot extent, requiere scroll real con `scrollIntoView()` para que above-the-fold + below-the-fold se evaluen correctamente.
+
+### Files changed
+
+- New: `lib/format.ts`, `lib/tasting.ts`, `components/public/BuyBlock.tsx`, `app/admin-login/{page,layout}.tsx`, `scripts/generate-images.ts`
+- Renamed: `app/(admin)/admin/login/` to `app/admin-login/` (out of route group)
+- Modified: `components/public/CumbreCard.tsx` (Image fixed width/height), `components/public/HeroBg.tsx` (real hero.jpg behind gradient), `app/(public)/cervezas/[slug]/page.tsx` (BuyBlock + tasting per slug + Image full-bleed), `app/(public)/cervezas/page.tsx` (ALTITUDES new slugs), `app/(public)/page.tsx` (ALTITUDES), `app/(public)/checkout/page.tsx` (paymentMode prop), `components/public/CheckoutForm.tsx` (mode-aware copy), `app/layout.tsx` (openGraph + twitter metadata), `app/api/auth/login/route.ts` (dual JSON+form), `middleware.ts` (/admin-login), `config/seed.ts` (rename + Schwarzbier specs), `lib/admin/reports.ts` (UNION subquery + TZ-aware date_trunc), `tests/admin-products-schema.test.ts` (heroImageUrl Jakob)
+- New public assets: `public/products/{catedral,tronador,lopez,frey,laguna-negra,jakob}-packshot.jpg`, `public/hero.jpg`, `public/og.jpg`
+
+### Tests
+
+- 116 unit/integration siguen passing
+- 5 Playwright E2E Phase 3 verdes
+
+### Done criteria met
+
+- `pnpm test` 116/116
+- `pnpm typecheck` clean
+- `pnpm build` clean
+- Production deploy LIVE https://cumbre-three.vercel.app
+- Smoke visual via agent-browser: home, catalog, PDPs (Tronador, Laguna Negra, Jakob), carrito, checkout, admin-login todos OK
