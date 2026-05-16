@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { fmtPrice } from '@/lib/products';
+import { fmtPrice } from '@/lib/format';
 
 type Pack = { id: number; size: number; priceCents: number };
 
