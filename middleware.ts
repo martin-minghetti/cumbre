@@ -2,17 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifySession } from '@/lib/auth/session';
 import { isSafeRelative } from '@/lib/safe-redirect';
 
+const CASHIER_ALLOWED_PREFIXES = ['/admin/pos', '/admin/caja'];
+
+function cashierMayAccess(pathname: string): boolean {
+  return CASHIER_ALLOWED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'));
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Allow public auth endpoints
   if (pathname.startsWith('/api/auth')) return NextResponse.next();
-  // Allow admin login page itself
   if (pathname === '/admin-login') return NextResponse.next();
 
   const isAdmin = pathname.startsWith('/admin');
-  const isPos = pathname.startsWith('/pos');
-  if (!isAdmin && !isPos) return NextResponse.next();
+  if (!isAdmin) return NextResponse.next();
 
   const token = req.cookies.get('session')?.value;
   const session = token ? await verifySession(token) : null;
@@ -20,21 +23,21 @@ export async function middleware(req: NextRequest) {
   if (!session) {
     const url = req.nextUrl.clone();
     url.pathname = '/admin-login';
-    if (isSafeRelative(pathname)) {
-      url.searchParams.set('redirect', pathname);
-    }
+    if (isSafeRelative(pathname)) url.searchParams.set('redirect', pathname);
     return NextResponse.redirect(url);
   }
 
-  if (isAdmin && session.role !== 'owner') {
-    const url = req.nextUrl.clone();
-    url.pathname = '/pos';
-    return NextResponse.redirect(url);
+  if (session.role === 'owner') return NextResponse.next();
+
+  if (session.role === 'cashier' && cashierMayAccess(pathname)) {
+    return NextResponse.next();
   }
 
-  return NextResponse.next();
+  const url = req.nextUrl.clone();
+  url.pathname = '/admin/pos';
+  return NextResponse.redirect(url);
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/pos/:path*'],
+  matcher: ['/admin/:path*'],
 };

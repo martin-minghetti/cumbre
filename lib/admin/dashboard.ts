@@ -3,10 +3,11 @@ import { sql } from 'drizzle-orm';
 
 export async function getMonthlyRevenueCents(): Promise<number> {
   const r = await db.execute(sql`
-    SELECT COALESCE(SUM(total_cents), 0)::bigint AS total
-    FROM orders
-    WHERE status = 'paid'
-      AND created_at >= date_trunc('month', NOW())
+    SELECT (
+      COALESCE((SELECT SUM(total_cents) FROM orders WHERE status IN ('paid','fulfilled') AND created_at >= date_trunc('month', NOW())), 0)
+      +
+      COALESCE((SELECT SUM(total_cents) FROM pos_sales WHERE created_at >= date_trunc('month', NOW())), 0)
+    )::bigint AS total
   `);
   const total = (r.rows[0] as { total: string | number | null })?.total;
   return total ? Number(total) : 0;

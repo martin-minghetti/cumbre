@@ -314,3 +314,75 @@ Tracking wall-clock activos por hito. Honest tracking, no cherry-picking.
 - `pnpm build` clean
 - Production deploy LIVE https://cumbre-three.vercel.app
 - Smoke visual via agent-browser: home, catalog, PDPs (Tronador, Laguna Negra, Jakob), carrito, checkout, admin-login todos OK
+
+## Phase 5: POS + Caja + Cashier UI
+
+- **Start:** 2026-05-15 (late) / 2026-05-16 (early hours)
+- **End:** 2026-05-16
+- **Wall-clock estimate:** 3-4h
+- **Actual:** ~3h activos (subagent-driven con plan upfront + review loops por task)
+- **Live:** https://cumbre-three.vercel.app
+
+### Tasks completadas (todas merged)
+
+- [x] Task 0: Bootstrap branch + BUILD_LOG header
+- [x] Task 1: currentUser helper + middleware allowlist cashier (TDD, 4 tests)
+- [x] Task 2: cash-sessions data layer (8 tests, fix listSessions WHERE pattern)
+- [x] Task 3: createPosSale FIFO + TX (8 tests, fix dedupe pack ids + happy path)
+- [x] Task 4: pos-catalog query
+- [x] Task 5: Sidebar nav items + role filter (POS + Caja en grupo Caja)
+- [x] Task 6: /admin/caja UI abrir/cerrar/historico + server actions
+- [x] Task 7: /admin/pos UI grid + cart + payment dialog (client components con useTransition)
+- [x] Task 8: /admin/ventas unificado online+POS via UNION ALL + toggle channel + detalle POS (3 tests)
+- [x] Task 9: reportes (getTopProducts, getSalesByPeriod) + dashboard (getMonthlyRevenueCents) suman POS via UNION ALL. Margen queda solo online con banner explicativo
+- [x] Task 10: setup-cashier idempotent script
+- [x] Task 11: Pre-deploy verify (typecheck + 139 vitest + build + dev smoke con agent-browser)
+- [x] Task 12: Deploy prod + agent-browser smoke owner + cashier
+
+### Tests
+
+- 139 unit/integration passing (116 prior + 23 nuevos: 4 currentUser + 8 cash-sessions + 8 pos-sale + 3 unified-sales)
+- 5 Playwright E2E Phase 3 siguen verdes
+- Dev smoke agent-browser local: PASS
+- Prod smoke agent-browser owner + cashier: PASS
+
+### Decisiones tecnicas firmed
+
+- **POS dentro de `/admin/pos` y `/admin/caja`** en vez del `app/pos/` standalone del SPEC original. Razon: reusar el shell `.admin-shell` ya armado (sidebar, paleta cobre, login restyled). Trade-off mitigado filtrando items del Sidebar por role.
+- **Middleware con allowlist por path** para cashier (`CASHIER_ALLOWED_PREFIXES = ['/admin/pos', '/admin/caja']`). Mas limpio que duplicar layout en route group nuevo. Cashier hitting otros `/admin/*` redirige a `/admin/pos`.
+- **`createPosSale` reusa `lockBatchesForProductsFifo` de `lib/order-paid/data.ts`** dentro de la TX. Cero duplicacion de logica FIFO entre online (sale_online) y POS (sale_pos).
+- **`stockMovements.reason = 'sale_pos'` + `referenceId = posSales.id`** para trazabilidad lote -> venta presencial (mismo patron que online).
+- **`getMarginByProduct` NO incluye POS** (banner amarillo en UI explica). Razon: derivar costo proporcional FIFO para POS requeriria mas trabajo que no aporta al demo.
+- **Ventas unificadas via UNION ALL wrapped in subquery** para ORDER BY exterior. Mismo patron que `getCriticalStockProducts` con sort por expresion (Phase 4 lesson).
+- **CSV export rechaza `channel=all` con 400** (decision producto: exportar mezclado mezcla shapes distintos). Owner debe elegir un canal especifico.
+
+### Bugs detectados durante review loops + fixed in session
+
+1. `listSessions` SQL fragile: interpolacion inline de WHERE en SQL crudo. Fix: pasar a `conds[] + sql.join` (consistente con `lib/admin/sales.ts`).
+2. `createPosSale` con duplicate packDefinitionId en items: `ANY(ARRAY[1,1,2])` deduplica en Postgres, `packs.length !== packIds.length` falseaba positive y disparaba `unknown_pack`. Fix: `Array.from(new Set(packIds))` antes del query + length check.
+3. Missing inactive user test en currentUser (cobertura de `if (!u.active) return null` path). Fix: agregar test red.
+4. Missing happy path test en createPosSale. Fix: mock chain completo de inserts.
+5. Renombre defensivo de locals `tok/sess/u` a `token/session/user` para consistencia con `middleware.ts`.
+
+### Deploy operativo
+
+- Vercel sin auto-deploy desde GitHub. Manual: `vercel deploy --prod --yes` + `vercel alias set <hash> cumbre-three.vercel.app`.
+- Cashier creado en prod DB: `cashier@cumbre.beer` (id=2). Password definido at runtime via env vars (`INITIAL_CASHIER_*`), borrar despues de uso.
+
+### Done criteria met
+
+- `pnpm tsc --noEmit` clean
+- `pnpm vitest run` 139/139 passing
+- `pnpm build` clean (37 routes registradas, todas las Phase 5 visibles)
+- Production deploy LIVE en https://cumbre-three.vercel.app (alias `cumbre-j7grt1ddc`)
+- Smoke prod owner: login + sidebar full + abrir caja + venta efectivo + ver venta en /admin/ventas POS + /admin/caja open. PASS.
+- Smoke prod cashier: login redirect a /admin/pos/no-session + sidebar SOLO Caja + middleware allowlist gateando /admin/productos + abrir caja propia + venta tarjeta + /admin/caja muestra SOLO sesion propia + cerrar con diff 0. PASS.
+- Cero hydration errors, cero 500s, cero client bundle env leaks (Phase 4 polish lesson aplicada).
+
+### Out of scope (Phase 6+)
+
+- `getMarginByProduct` incluyendo POS (requiere derivar costo proporcional FIFO por POS sale)
+- E2E Playwright para flow POS (manual smoke + 139 unit cubren)
+- Print ticket POS (window.print con layout 80mm termico)
+- Multi-cashier concurrent: partial unique index en cash_sessions(opened_by) WHERE closed_at IS NULL para que la DB enforce la regla "una sesion abierta por user"
+- Vercel GitHub auto-deploy (housekeeping)

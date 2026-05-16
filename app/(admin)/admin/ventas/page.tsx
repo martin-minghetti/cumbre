@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import type { Route } from 'next';
-import { listOnlineOrders } from '@/lib/admin/sales';
+import { listUnifiedSales, channelFilterSchema, type Channel } from '@/lib/admin/unified-sales';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
+export const dynamic = 'force-dynamic';
 
 const fmt = (c: number) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(c / 100);
 const fmtDate = (s: string) => new Date(s).toLocaleString('es-AR');
@@ -15,30 +17,52 @@ const STATUS_OPTIONS = [
   { value: 'cancelled', label: 'Cancelada' },
 ];
 
+const CHANNEL_OPTIONS: { value: Channel; label: string }[] = [
+  { value: 'all', label: 'Todos los canales' },
+  { value: 'online', label: 'Online' },
+  { value: 'pos', label: 'POS' },
+];
+
 export default async function VentasPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
-  const status = sp.status as 'pending' | 'paid' | 'fulfilled' | 'cancelled' | undefined;
-  const rows = await listOnlineOrders({ status, fromDate: sp.from, toDate: sp.to });
+  const channelParsed = channelFilterSchema.safeParse(sp.channel ?? 'all');
+  const channel: Channel = channelParsed.success ? channelParsed.data : 'all';
+  const status = (channel === 'online' || channel === 'all') ? (sp.status as string | undefined) : undefined;
 
-  const exportHref = `/admin/ventas/export?${new URLSearchParams({
+  const rows = await listUnifiedSales({
+    channel,
+    status: status && status !== '' ? status : undefined,
+    fromDate: sp.from,
+    toDate: sp.to,
+  });
+
+  const qs = new URLSearchParams({
+    channel,
     ...(status ? { status } : {}),
     ...(sp.from ? { from: sp.from } : {}),
     ...(sp.to ? { to: sp.to } : {}),
-  }).toString()}`;
+  });
+  const exportHref = `/admin/ventas/export?${qs.toString()}`;
 
   return (
     <div className="p-8 space-y-6">
       <header className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold">Ventas online</h1>
-          <p className="text-sm text-muted-foreground">{rows.length} ordenes (max 500)</p>
+          <h1 className="text-2xl font-semibold">Ventas</h1>
+          <p className="text-sm text-muted-foreground">{rows.length} registros (max 500), {channel === 'all' ? 'online + POS' : channel}</p>
         </div>
         <Button asChild variant="outline"><a href={exportHref}>Exportar CSV</a></Button>
       </header>
 
-      <form className="flex gap-3 items-end" method="get">
+      <form className="flex gap-3 items-end flex-wrap" method="get">
         <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">Estado</label>
+          <label className="text-xs text-muted-foreground">Canal</label>
+          <select name="channel" defaultValue={channel} className="rounded-md border px-3 py-2 text-sm">
+            {CHANNEL_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">Estado (solo online)</label>
           <select name="status" defaultValue={status ?? ''} className="rounded-md border px-3 py-2 text-sm">
             {STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
@@ -58,27 +82,32 @@ export default async function VentasPage({ searchParams }: { searchParams: Promi
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Canal</TableHead>
               <TableHead>#</TableHead>
               <TableHead>Fecha</TableHead>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Estado</TableHead>
+              <TableHead>Cliente / Cajero</TableHead>
+              <TableHead>Estado / Pago</TableHead>
               <TableHead className="text-right">Total</TableHead>
               <TableHead className="w-20" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {rows.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8">Sin resultados.</TableCell></TableRow>
-            ) : rows.map((o) => (
-              <TableRow key={o.id}>
-                <TableCell className="font-mono">#{o.id}</TableCell>
-                <TableCell className="text-sm">{fmtDate(o.createdAt)}</TableCell>
-                <TableCell>{o.customerName} <span className="text-muted-foreground text-xs">{o.customerEmail}</span></TableCell>
-                <TableCell><span className="inline-flex rounded-md bg-muted px-2 py-1 text-xs">{o.status}</span></TableCell>
-                <TableCell className="text-right tabular-nums">{fmt(Number(o.totalCents))}</TableCell>
-                <TableCell><Link href={`/admin/ventas/${o.id}` as Route} className="text-primary text-sm">Ver</Link></TableCell>
-              </TableRow>
-            ))}
+              <TableRow><TableCell colSpan={7} className="text-center py-8">Sin resultados.</TableCell></TableRow>
+            ) : rows.map((r) => {
+              const href = r.source === 'online' ? `/admin/ventas/${r.id}` : `/admin/ventas/pos/${r.id}`;
+              return (
+                <TableRow key={`${r.source}-${r.id}`}>
+                  <TableCell><span className={`inline-flex rounded-md px-2 py-0.5 text-xs ${r.source === 'pos' ? 'bg-primary/15 text-primary' : 'bg-muted'}`}>{r.source}</span></TableCell>
+                  <TableCell className="font-mono">#{r.id}</TableCell>
+                  <TableCell className="text-sm">{fmtDate(r.createdAt)}</TableCell>
+                  <TableCell>{r.customerLabel}</TableCell>
+                  <TableCell><span className="inline-flex rounded-md bg-muted px-2 py-1 text-xs">{r.status ?? r.paymentMethod ?? 's/d'}</span></TableCell>
+                  <TableCell className="text-right tabular-nums">{fmt(r.totalCents)}</TableCell>
+                  <TableCell><Link href={href as Route} className="text-primary text-sm">Ver</Link></TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
