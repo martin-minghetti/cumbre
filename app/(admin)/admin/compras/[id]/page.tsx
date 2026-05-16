@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getPurchaseOrderWithItems } from '@/lib/admin/purchase-orders';
 import { POStatusActions } from '@/components/admin/POStatusActions';
+import { POStatusBadge } from '@/components/admin/Badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -18,26 +19,26 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
     <div className="p-8 space-y-6">
       <header>
         <p className="text-sm text-muted-foreground">Orden de compra</p>
-        <h1 className="text-2xl font-semibold font-mono">#{data.po.id}</h1>
+        <h1 className="text-2xl font-semibold font-mono tabular-nums">#{data.po.id}</h1>
         <p className="text-sm">Proveedor: {data.po.supplierName}</p>
       </header>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Estado</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-semibold">{data.po.status}</div></CardContent>
+          <CardContent><POStatusBadge status={data.po.status} /></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Enviada</CardTitle></CardHeader>
-          <CardContent><div className="text-sm">{fmtDate(data.po.placedAt as unknown as string | null)}</div></CardContent>
+          <CardContent><div className="text-sm tabular-nums">{fmtDate(data.po.placedAt as unknown as string | null)}</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Recibida</CardTitle></CardHeader>
-          <CardContent><div className="text-sm">{fmtDate(data.po.receivedAt as unknown as string | null)}</div></CardContent>
+          <CardContent><div className="text-sm tabular-nums">{fmtDate(data.po.receivedAt as unknown as string | null)}</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Total</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-semibold">{fmt(Number(data.po.totalCents))}</div></CardContent>
+          <CardContent><div className="text-2xl font-semibold font-mono tabular-nums">{fmt(Number(data.po.totalCents))}</div></CardContent>
         </Card>
       </div>
 
@@ -60,8 +61,8 @@ export default async function PODetailPage({ params }: { params: Promise<{ id: s
                   <TableCell>{it.supplyName}</TableCell>
                   <TableCell className="text-right tabular-nums">{it.qty}</TableCell>
                   <TableCell>{it.unit}</TableCell>
-                  <TableCell className="text-right tabular-nums">{fmt(it.unitCostCents)}</TableCell>
-                  <TableCell className="text-right tabular-nums">{fmt(it.qty * it.unitCostCents)}</TableCell>
+                  <TableCell className="text-right font-mono tabular-nums">{fmt(it.unitCostCents)}</TableCell>
+                  <TableCell className="text-right font-mono tabular-nums">{fmt(it.qty * it.unitCostCents)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

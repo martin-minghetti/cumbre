@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getBatchById, listBatchMovements, listBatchSupplyConsumption } from '@/lib/admin/batches';
+import { BatchStatusBadge } from '@/components/admin/Badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -25,10 +26,10 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
         <h1 className="text-2xl font-semibold font-mono">{batch.lotCode}</h1>
       </header>
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Producidas</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold">{batch.unitsProduced}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Volumen (L)</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold">{batch.volumeProducedL}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Costo total</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold">{fmtCents(Number(batch.costTotalCents))}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Estado</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold">{batch.status}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Producidas</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold tabular-nums">{batch.unitsProduced}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Volumen (L)</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold tabular-nums">{batch.volumeProducedL}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Costo total</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold font-mono tabular-nums">{fmtCents(Number(batch.costTotalCents))}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Estado</CardTitle></CardHeader><CardContent><BatchStatusBadge status={batch.status} /></CardContent></Card>
       </div>
 
       <section>
@@ -57,10 +58,10 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
                 <TableRow><TableCell colSpan={4} className="text-center py-4 text-muted-foreground">Sin movimientos.</TableCell></TableRow>
               ) : movements.map((m) => (
                 <TableRow key={m.id}>
-                  <TableCell className="text-sm">{new Date(m.createdAt).toLocaleString('es-AR')}</TableCell>
-                  <TableCell className={'tabular-nums ' + (m.delta < 0 ? 'text-red-600' : 'text-green-700')}>{m.delta > 0 ? `+${m.delta}` : m.delta}</TableCell>
+                  <TableCell className="text-sm tabular-nums">{new Date(m.createdAt).toLocaleString('es-AR')}</TableCell>
+                  <TableCell className={'font-mono tabular-nums ' + (m.delta < 0 ? 'text-red-600' : 'text-green-700')}>{m.delta > 0 ? `+${m.delta}` : m.delta}</TableCell>
                   <TableCell>{m.reason}</TableCell>
-                  <TableCell className="text-muted-foreground">{m.referenceId ?? ''}</TableCell>
+                  <TableCell className="text-muted-foreground font-mono tabular-nums">{m.referenceId ?? ''}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

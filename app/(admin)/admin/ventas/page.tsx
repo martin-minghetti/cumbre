@@ -2,6 +2,8 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { listUnifiedSales, channelFilterSchema, type Channel } from '@/lib/admin/unified-sales';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
+import { ChannelBadge, OrderStatusBadge, StatusBadge } from '@/components/admin/Badge';
+import { EmptyState } from '@/components/admin/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -83,39 +85,52 @@ export default async function VentasPage({ searchParams }: { searchParams: Promi
         <Button type="submit" size="sm">Filtrar</Button>
       </form>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Canal</TableHead>
-              <TableHead>#</TableHead>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Cliente / Cajero</TableHead>
-              <TableHead>Estado / Pago</TableHead>
-              <TableHead className="text-right">Total</TableHead>
-              <TableHead className="w-20" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8">Sin resultados.</TableCell></TableRow>
-            ) : rows.map((r) => {
-              const href = r.source === 'online' ? `/admin/ventas/${r.id}` : `/admin/ventas/pos/${r.id}`;
-              return (
-                <TableRow key={`${r.source}-${r.id}`}>
-                  <TableCell><span className={`inline-flex rounded-md px-2 py-0.5 text-xs ${r.source === 'pos' ? 'bg-primary/15 text-primary' : 'bg-muted'}`}>{r.source}</span></TableCell>
-                  <TableCell className="font-mono">#{r.id}</TableCell>
-                  <TableCell className="text-sm">{fmtDate(r.createdAt)}</TableCell>
-                  <TableCell>{r.customerLabel}</TableCell>
-                  <TableCell><span className="inline-flex rounded-md bg-muted px-2 py-1 text-xs">{r.status ?? r.paymentMethod ?? 's/d'}</span></TableCell>
-                  <TableCell className="text-right tabular-nums">{fmt(r.totalCents)}</TableCell>
-                  <TableCell><Link href={href as Route} className="text-primary text-sm">Ver</Link></TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
+      {rows.length === 0 ? (
+        <EmptyState
+          title="Sin ventas en este filtro"
+          helper="Ajusta el canal o el rango de fechas."
+        />
+      ) : (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Canal</TableHead>
+                <TableHead>#</TableHead>
+                <TableHead>Fecha</TableHead>
+                <TableHead>Cliente / Cajero</TableHead>
+                <TableHead>Estado / Pago</TableHead>
+                <TableHead className="text-right">Total</TableHead>
+                <TableHead className="w-20" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((r) => {
+                const href = r.source === 'online' ? `/admin/ventas/${r.id}` : `/admin/ventas/pos/${r.id}`;
+                return (
+                  <TableRow key={`${r.source}-${r.id}`}>
+                    <TableCell><ChannelBadge source={r.source} /></TableCell>
+                    <TableCell className="font-mono tabular-nums">#{r.id}</TableCell>
+                    <TableCell className="text-sm tabular-nums">{fmtDate(r.createdAt)}</TableCell>
+                    <TableCell>{r.customerLabel}</TableCell>
+                    <TableCell>
+                      {r.status ? (
+                        <OrderStatusBadge status={r.status} />
+                      ) : r.paymentMethod ? (
+                        <StatusBadge tone="muted">{r.paymentMethod}</StatusBadge>
+                      ) : (
+                        <StatusBadge tone="muted">s/d</StatusBadge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right font-mono tabular-nums">{fmt(r.totalCents)}</TableCell>
+                    <TableCell><Link href={href as Route} className="text-primary text-sm">Ver</Link></TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 }

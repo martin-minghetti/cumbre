@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { listSuppliers } from '@/lib/admin/suppliers';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
+import { EmptyState } from '@/components/admin/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -19,31 +20,30 @@ export default async function SuppliersPage() {
           </Button>
         }
       />
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Contacto</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>CUIT</TableHead>
-              <TableHead className="w-24" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.length === 0 ? (
+      {rows.length === 0 ? (
+        <EmptyState
+          title="Sin proveedores"
+          helper="Carga proveedores para emitir ordenes de compra."
+        />
+      ) : (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
-                  Sin proveedores.
-                </TableCell>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Contacto</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>CUIT</TableHead>
+                <TableHead className="w-24" />
               </TableRow>
-            ) : (
-              rows.map((s) => (
+            </TableHeader>
+            <TableBody>
+              {rows.map((s) => (
                 <TableRow key={s.id}>
                   <TableCell className="font-medium">{s.name}</TableCell>
                   <TableCell>{s.contactName ?? ''}</TableCell>
                   <TableCell>{s.email ?? ''}</TableCell>
-                  <TableCell className="tabular-nums">{s.cuit ?? ''}</TableCell>
+                  <TableCell className="font-mono tabular-nums">{s.cuit ?? ''}</TableCell>
                   <TableCell>
                     <Link
                       href={`/admin/proveedores/${s.id}/edit` as Route}
@@ -53,11 +53,11 @@ export default async function SuppliersPage() {
                     </Link>
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 }

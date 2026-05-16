@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getOrderDetail } from '@/lib/admin/sales';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
+import { OrderStatusBadge } from '@/components/admin/Badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { MarkFulfilledButton } from './MarkFulfilledButton';
@@ -25,10 +26,10 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       />
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Estado</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold">{data.order.status}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Creada</CardTitle></CardHeader><CardContent><div className="text-sm">{fmtDate(data.order.createdAt)}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Pagada</CardTitle></CardHeader><CardContent><div className="text-sm">{fmtDate(data.order.paidAt)}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Total</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold">{fmt(data.order.totalCents)}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Estado</CardTitle></CardHeader><CardContent><OrderStatusBadge status={data.order.status} /></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Creada</CardTitle></CardHeader><CardContent><div className="text-sm tabular-nums">{fmtDate(data.order.createdAt)}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Pagada</CardTitle></CardHeader><CardContent><div className="text-sm tabular-nums">{fmtDate(data.order.paidAt)}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Total</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold font-mono tabular-nums">{fmt(data.order.totalCents)}</div></CardContent></Card>
       </div>
 
       <section>
@@ -42,8 +43,8 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                   <TableCell>{it.productName}</TableCell>
                   <TableCell>{it.packSize === 1 ? 'Unidad' : `Pack ${it.packSize}`}</TableCell>
                   <TableCell className="text-right tabular-nums">{it.qty}</TableCell>
-                  <TableCell className="text-right tabular-nums">{fmt(it.unitPriceCents)}</TableCell>
-                  <TableCell className="text-right tabular-nums">{fmt(it.lineTotalCents)}</TableCell>
+                  <TableCell className="text-right font-mono tabular-nums">{fmt(it.unitPriceCents)}</TableCell>
+                  <TableCell className="text-right font-mono tabular-nums">{fmt(it.lineTotalCents)}</TableCell>
                   <TableCell className="font-mono text-xs">{it.batchLotCodes.length > 0 ? it.batchLotCodes.join(', ') : '-'}</TableCell>
                 </TableRow>
               ))}

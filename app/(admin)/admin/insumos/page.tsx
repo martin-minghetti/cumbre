@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { listSupplies } from '@/lib/admin/supplies';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
+import { EmptyState } from '@/components/admin/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -19,26 +20,25 @@ export default async function SuppliesPage() {
           </Button>
         }
       />
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Unidad</TableHead>
-              <TableHead className="text-right">Stock actual</TableHead>
-              <TableHead className="text-right">Reorder</TableHead>
-              <TableHead className="w-20" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.length === 0 ? (
+      {rows.length === 0 ? (
+        <EmptyState
+          title="Sin insumos"
+          helper="Crea tu primer insumo para empezar a controlar stock."
+        />
+      ) : (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
-                  Sin insumos.
-                </TableCell>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Unidad</TableHead>
+                <TableHead className="text-right">Stock actual</TableHead>
+                <TableHead className="text-right">Reorder</TableHead>
+                <TableHead className="w-20" />
               </TableRow>
-            ) : (
-              rows.map((s) => {
+            </TableHeader>
+            <TableBody>
+              {rows.map((s) => {
                 const critical = s.currentQty < s.reorderPoint;
                 return (
                   <TableRow key={s.id}>
@@ -46,12 +46,12 @@ export default async function SuppliesPage() {
                     <TableCell>{s.unit}</TableCell>
                     <TableCell
                       className={
-                        'text-right tabular-nums ' + (critical ? 'text-red-600 font-medium' : '')
+                        'text-right font-mono tabular-nums ' + (critical ? 'text-red-600 font-medium' : '')
                       }
                     >
                       {s.currentQty}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums text-muted-foreground">
+                    <TableCell className="text-right font-mono tabular-nums text-muted-foreground">
                       {s.reorderPoint}
                     </TableCell>
                     <TableCell>
@@ -64,11 +64,11 @@ export default async function SuppliesPage() {
                     </TableCell>
                   </TableRow>
                 );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 }

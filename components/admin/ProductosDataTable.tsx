@@ -28,6 +28,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, ArrowUpDown } from 'lucide-react';
 import type { ProductRow } from '@/lib/admin/products';
+import { StatusBadge } from '@/components/admin/Badge';
+import { EmptyState } from '@/components/admin/EmptyState';
 
 function formatLabel(f: 'lata_473' | 'porron_1l'): string {
   return f === 'lata_473' ? 'Lata 473ml' : 'Porron 1L';
@@ -47,7 +49,7 @@ const columns: ColumnDef<ProductRow>[] = [
     cell: ({ row }) => (
       <div>
         <div className="font-medium">{row.original.name}</div>
-        <div className="text-xs text-muted-foreground">{row.original.slug}</div>
+        <div className="text-xs text-muted-foreground font-mono">{row.original.slug}</div>
       </div>
     ),
   },
@@ -59,9 +61,7 @@ const columns: ColumnDef<ProductRow>[] = [
     accessorKey: 'format',
     header: 'Formato',
     cell: ({ row }) => (
-      <span className="inline-flex rounded-md bg-muted px-2 py-1 text-xs">
-        {formatLabel(row.original.format)}
-      </span>
+      <StatusBadge tone="muted">{formatLabel(row.original.format)}</StatusBadge>
     ),
   },
   {
@@ -72,7 +72,7 @@ const columns: ColumnDef<ProductRow>[] = [
       const ibu = row.original.ibuDefault;
       const abvStr = abv == null ? 'N/A' : `${(abv / 10).toFixed(1)}%`;
       const ibuStr = ibu == null ? 'N/A' : String(ibu);
-      return <span className="tabular-nums">{abvStr} / {ibuStr}</span>;
+      return <span className="font-mono tabular-nums">{abvStr} / {ibuStr}</span>;
     },
   },
   {
@@ -90,7 +90,7 @@ const columns: ColumnDef<ProductRow>[] = [
       const reorder = row.original.reorderPoint;
       const critical = stock < reorder;
       return (
-        <span className={'tabular-nums ' + (critical ? 'text-red-600 font-medium' : '')}>
+        <span className={'font-mono tabular-nums ' + (critical ? 'text-red-600 font-medium' : '')}>
           {stock}
         </span>
       );
@@ -100,7 +100,7 @@ const columns: ColumnDef<ProductRow>[] = [
     accessorKey: 'reorderPoint',
     header: 'Reorder',
     cell: ({ row }) => (
-      <span className="tabular-nums text-muted-foreground text-sm">
+      <span className="font-mono tabular-nums text-muted-foreground text-sm">
         {row.original.reorderPoint}
       </span>
     ),
@@ -109,16 +109,9 @@ const columns: ColumnDef<ProductRow>[] = [
     accessorKey: 'active',
     header: 'Activo',
     cell: ({ row }) => (
-      <span
-        className={
-          'inline-flex rounded-md px-2 py-1 text-xs ' +
-          (row.original.active
-            ? 'bg-green-100 text-green-800'
-            : 'bg-gray-100 text-gray-600')
-        }
-      >
+      <StatusBadge tone={row.original.active ? 'positive' : 'muted'}>
         {row.original.active ? 'Si' : 'No'}
-      </span>
+      </StatusBadge>
     ),
   },
   {
@@ -163,6 +156,15 @@ export function ProductosDataTable({ products }: { products: ProductRow[] }) {
     getSortedRowModel: getSortedRowModel(),
   });
 
+  if (table.getRowModel().rows.length === 0) {
+    return (
+      <EmptyState
+        title="Sin productos"
+        helper="Crea tu primer producto para llenar el catalogo."
+      />
+    );
+  }
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -180,23 +182,15 @@ export function ProductosDataTable({ products }: { products: ProductRow[] }) {
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="text-center py-8">
-                Sin productos.
-              </TableCell>
+          {table.getRowModel().rows.map((row) => (
+            <TableRow key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
             </TableRow>
-          ) : (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          )}
+          ))}
         </TableBody>
       </Table>
     </div>

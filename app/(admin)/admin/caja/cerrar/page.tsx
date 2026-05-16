@@ -44,11 +44,11 @@ export default async function CerrarCajaPage({ searchParams }: { searchParams: P
       />
       <Card>
         <CardContent className="space-y-3">
-          <div className="text-sm text-muted-foreground">
-            <p>Sesion #{open.id} abierta {new Date(open.openedAt).toLocaleString('es-AR')}</p>
-            <p>Inicio: {fmtCents(Number(open.openingAmountCents))}</p>
-            <p>Ventas registradas: {sales.rows.length}</p>
-            <p className="font-mono">Esperado en caja (cash): {fmtCents(expected)}</p>
+          <div className="text-sm text-muted-foreground space-y-1">
+            <p>Sesion <span className="font-mono tabular-nums">#{open.id}</span> abierta <span className="tabular-nums">{new Date(open.openedAt).toLocaleString('es-AR')}</span></p>
+            <p>Inicio: <span className="font-mono tabular-nums">{fmtCents(Number(open.openingAmountCents))}</span></p>
+            <p>Ventas registradas: <span className="tabular-nums">{sales.rows.length}</span></p>
+            <p className="font-mono tabular-nums">Esperado en caja (cash): {fmtCents(expected)}</p>
           </div>
           <form action={closeSessionAction} className="space-y-3">
             <input type="hidden" name="sessionId" value={open.id} />
