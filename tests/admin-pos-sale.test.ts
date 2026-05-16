@@ -115,4 +115,47 @@ describe('createPosSale', () => {
     });
     expect(r).toEqual({ ok: false, error: 'insufficient_stock' });
   });
+
+  it('returns ok with saleId + totalCents on happy path', async () => {
+    // Session lookup
+    const selectChain = {
+      from: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue([{ id: 1, closedAt: null, openedBy: 7 }]),
+    };
+    dbMock.select.mockReturnValue(selectChain);
+
+    // Pack metadata lookup
+    dbMock.execute.mockResolvedValueOnce({
+      rows: [{ packDefinitionId: 1, productId: 5, packSize: 1, priceCents: 3800 }],
+    });
+
+    // FIFO returns enough stock
+    fifoData.lockBatchesForProductsFifo.mockResolvedValue(
+      new Map([[5, [{ batchId: 10, available: 100 }]]]),
+    );
+
+    // posSales insert returning saleId
+    // posSaleItems insert (no return)
+    // stockMovements insert (no return)
+    const returningFn = vi.fn().mockResolvedValue([{ id: 42 }]);
+    const valuesFn1 = vi.fn().mockReturnValue({ returning: returningFn });
+    const valuesFn2 = vi.fn().mockResolvedValue(undefined);
+    const valuesFn3 = vi.fn().mockResolvedValue(undefined);
+    dbMock.insert
+      .mockReturnValueOnce({ values: valuesFn1 }) // posSales
+      .mockReturnValueOnce({ values: valuesFn2 }) // posSaleItems
+      .mockReturnValueOnce({ values: valuesFn3 }); // stockMovements
+
+    const r = await createPosSale({
+      cashSessionId: 1,
+      cashierId: 7,
+      paymentMethod: 'cash',
+      items: [{ packDefinitionId: 1, qty: 2, unitPriceCents: 3800 }],
+    });
+
+    expect(r).toEqual({ ok: true, saleId: 42, totalCents: 7600 });
+    expect(dbMock.transaction).toHaveBeenCalledTimes(1);
+    expect(dbMock.insert).toHaveBeenCalledTimes(3); // posSales + posSaleItems + stockMovements
+  });
 });

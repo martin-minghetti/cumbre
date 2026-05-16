@@ -38,14 +38,15 @@ export async function createPosSale(input: PosSaleInput & { cashierId: number })
 
   // 2) Resolve pack to product metadata.
   const packIds = input.items.map((i) => i.packDefinitionId);
-  const packIdsList = sql.raw(`ARRAY[${packIds.join(',')}]::int[]`);
+  const uniquePackIds = Array.from(new Set(packIds));
+  const packIdsList = sql.raw(`ARRAY[${uniquePackIds.join(',')}]::int[]`);
   const packsRes = await db.execute(sql`
     SELECT pd.id AS "packDefinitionId", pd.product_id AS "productId", pd.size AS "packSize", pd.price_cents AS "priceCents"
     FROM pack_definitions pd
     WHERE pd.id = ANY(${packIdsList})
   `);
   const packs = packsRes.rows as { packDefinitionId: number; productId: number; packSize: number; priceCents: number }[];
-  if (packs.length !== packIds.length) return { ok: false, error: 'unknown_pack' };
+  if (packs.length !== uniquePackIds.length) return { ok: false, error: 'unknown_pack' };
   const packsById = new Map(packs.map((p) => [Number(p.packDefinitionId), p]));
 
   // Aggregate qty per product (units count) for FIFO allocation.
