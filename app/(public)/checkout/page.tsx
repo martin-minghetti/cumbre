@@ -8,6 +8,7 @@ import { packDefinitions, products } from '@/db/schema';
 import { verifyCart } from '@/lib/cart';
 import { getShippingOptions } from '@/lib/shipping';
 import { fmtFormat } from '@/lib/products';
+import { env } from '@/lib/env';
 import { CheckoutForm } from '@/components/public/CheckoutForm';
 
 export const dynamic = 'force-dynamic';
@@ -64,7 +65,7 @@ export default async function CheckoutPage() {
         </Link>
       </header>
 
-      <CheckoutForm items={items} shippingOptions={shippingOptions} />
+      <CheckoutForm items={items} shippingOptions={shippingOptions} paymentMode={env.PAYMENT_MODE} />
     </main>
   );
 }

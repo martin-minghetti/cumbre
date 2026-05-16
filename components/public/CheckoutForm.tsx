@@ -14,9 +14,10 @@ type CartItem = {
 type Props = {
   items: CartItem[];
   shippingOptions: ShippingOption[];
+  paymentMode: 'simulated' | 'production';
 };
 
-export function CheckoutForm({ items, shippingOptions }: Props) {
+export function CheckoutForm({ items, shippingOptions, paymentMode }: Props) {
   const [selected, setSelected] = useState<string>(
     shippingOptions[0]
       ? shippingOptions[0].method === 'pickup'
@@ -175,7 +176,9 @@ export function CheckoutForm({ items, shippingOptions }: Props) {
           {pending ? 'procesando…' : 'pagar →'}
         </button>
         <p className="mt-3 font-mono text-[10px] text-muted">
-          Te redirigimos a Mercado Pago para completar el pago.
+          {paymentMode === 'production'
+            ? 'Te redirigimos a Mercado Pago para completar el pago.'
+            : 'Demo: vas a ver una pantalla simulada de pago, no se cobra nada real.'}
         </p>
       </aside>
     </form>

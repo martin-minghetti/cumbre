@@ -3,6 +3,7 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { fmtAbv, fmtFormat, getProductBySlug } from '@/lib/products';
+import { getTastingForSlug } from '@/lib/tasting';
 import { BuyBlock } from '@/components/public/BuyBlock';
 
 const ALTITUDES: Record<string, number> = {
@@ -12,13 +13,6 @@ const ALTITUDES: Record<string, number> = {
   'frey-pilsner-lata': 1837,
   'laguna-negra-schwarzbier-porron': 1670,
   'jakob-porter-lata': 2030,
-};
-
-const DEFAULT_TASTING = {
-  vista: 'Color ámbar dorado con reflejos cobrizos. Espuma blanca compacta, persistencia media-alta. Carbonatación visible en columnas finas.',
-  nariz: 'Pomelo, naranja, mango. Detrás un pan dulce sutil, sin caramelo dominante. Lúpulo presente pero no agresivo.',
-  boca: 'Entrada cítrica y resinosa, cuerpo medio, amargor seco que se queda. Final largo con notas de pino y cáscara de naranja. Pide otra.',
-  temp: 'Servir a 6–8°C. Si está más fría se pierden los aromas del dry-hop. Si está más caliente, el alcohol se nota de más.',
 };
 
 function Spec({ label, value }: { label: string; value: string }) {
@@ -58,7 +52,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   if (!product) notFound();
 
   const altitude = ALTITUDES[product.slug];
-  const tasting = DEFAULT_TASTING;
+  const tasting = getTastingForSlug(product.slug);
 
   return (
     <>
