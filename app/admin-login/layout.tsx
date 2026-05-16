@@ -14,7 +14,7 @@ export default function AdminLoginLayout({ children }: { children: ReactNode }) 
   return (
     <div
       className={cn(
-        'admin-shell font-sans min-h-screen flex items-center justify-center bg-background',
+        'admin-shell dark font-sans min-h-screen flex items-center justify-center bg-background',
         geist.variable,
       )}
     >
