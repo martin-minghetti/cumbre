@@ -76,9 +76,14 @@ export function AppSidebar({ userRole }: { userRole: 'owner' | 'cashier' }) {
   const pathname = usePathname();
   return (
     <Sidebar>
-      <SidebarHeader>
-        <Link href={'/admin' as Route} className="px-2 py-3 font-bold text-lg">
-          Cumbre <span className="text-primary">Admin</span>
+      <SidebarHeader className="border-b border-sidebar-border/60 pb-4">
+        <Link href={'/admin' as Route} className="block px-3 pt-3 leading-none">
+          <span className="font-display text-3xl uppercase tracking-tight text-sidebar-foreground">
+            Cumbre
+          </span>
+          <span className="block font-mono text-[10px] uppercase tracking-[0.28em] text-sidebar-primary mt-1">
+            Admin
+          </span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
@@ -87,7 +92,9 @@ export function AppSidebar({ userRole }: { userRole: 'owner' | 'cashier' }) {
           if (visibleItems.length === 0) return null;
           return (
             <SidebarGroup key={group.label}>
-              <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+              <SidebarGroupLabel className="font-mono text-[10px] uppercase tracking-[0.22em] text-sidebar-foreground/50">
+                {group.label}
+              </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {visibleItems.map((item) => {
@@ -95,9 +102,17 @@ export function AppSidebar({ userRole }: { userRole: 'owner' | 'cashier' }) {
                     const active = isActive(pathname, item.href);
                     return (
                       <SidebarMenuItem key={item.href}>
-                        <SidebarMenuButton asChild isActive={active}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={active}
+                          className={
+                            active
+                              ? 'relative bg-sidebar-accent/60 text-sidebar-primary font-medium before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:bg-sidebar-primary before:rounded-r-sm'
+                              : 'text-sidebar-foreground/80 hover:text-sidebar-foreground'
+                          }
+                        >
                           <Link href={item.href as Route}>
-                            <Icon className="size-4" />
+                            <Icon className={'size-4 ' + (active ? 'text-sidebar-primary' : '')} />
                             <span>{item.label}</span>
                           </Link>
                         </SidebarMenuButton>
