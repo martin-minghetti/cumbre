@@ -386,3 +386,65 @@ Tracking wall-clock activos por hito. Honest tracking, no cherry-picking.
 - Print ticket POS (window.print con layout 80mm termico)
 - Multi-cashier concurrent: partial unique index en cash_sessions(opened_by) WHERE closed_at IS NULL para que la DB enforce la regla "una sesion abierta por user"
 - Vercel GitHub auto-deploy (housekeeping)
+
+## Phase 6 slice 1: Admin polish editorial
+
+- **Start:** 2026-05-16 (madrugada)
+- **End:** 2026-05-16
+- **Wall-clock estimate:** 2h
+- **Actual:** ~2.5h (mas que estimado por bug Tailwind v4 que requirio refactor del entry point)
+
+### Goal
+
+Cerrar el gap visual entre el front editorial publico (alpine logbook, Anton + Newsreader + paleta cobre/glacier) y el admin que estaba en shadcn defaults Geist + cobre debil. Audit previo con agent-browser flagged "admin se ve generico, sin identidad Cumbre, sin Anton, sin JetBrains Mono, sin cobre prominente".
+
+### Highlights
+
+- **Anton font-display** en sidebar header ("CUMBRE" 30px) + Page h1 en 18 paginas admin (font-display text-4xl md:text-5xl uppercase)
+- **JetBrains Mono** aplicado a lot codes, SKUs, CUITs, IDs (#42), todos los $ en tablas
+- **Cobre prominente**: KpiCard top stripe + active sidebar border-l-3 + page h1 underline rule + Anton numerals en KpiCard value
+- **Sidebar group labels** mono 10px uppercase tracking-[0.22em]
+- **3 nuevos componentes**: `AdminPageHeader` (eyebrow + Anton h1 + copper rule + actions slot), `Badge` (StatusBadge + ChannelBadge + OrderStatusBadge + BatchStatusBadge + POStatusBadge con paleta marca copper/glacier/positive/warning/danger/muted), `EmptyState` (eyebrow + Anton title + mono helper)
+- **18 paginas admin** migradas a AdminPageHeader con eyebrow contextual (e.g. "Catalogo / Productos", "Operaciones / Ventas", "Analisis / Margen")
+- **POS page** con header compact bar (POS + cajero + sesion + inicio en mono uppercase)
+- **Banner margen mas prominente**: border-l-4 amber-500 + "Aviso" mono eyebrow
+
+### Bug runtime atrapado + fix in session
+
+**Tailwind v4 utility generation gotcha** (mismo patron Phase 4 polish, reference_tailwind_v4_theme_inline). `app/(admin)/globals.css` tenia `@theme inline { --color-primary, --color-sidebar-primary, ... }` pero NO tenia `@import "tailwindcss"`. Tailwind v4 solo genera utilities desde archivos con ese import, por lo tanto `text-primary`, `bg-primary`, `text-sidebar-primary` NO existian en el bundle. El admin renderizaba colores fallback (cream del public theme) en lugar de cobre.
+
+**Fix**: agregar `@import "tailwindcss"` al admin globals.css (linea 1). Las utilities se generan, los CSS variables scoped a `.admin-shell` resuelven cobre correctamente.
+
+Lesson confirmed: tests mocked no atrapan esto. Solo smoke con agent-browser inspeccionando computed styles lo detecta. Phase 6 slice 1 lo descubrio en local antes del primer deploy (review loop con subagent).
+
+### Smoke comparativo
+
+Agent-browser screenshots antes/despues de 14 paginas admin:
+- **Massive lift**: dashboard, caja, ventas (all + pos), reportes/stock-critico, compras, batches (descripciones del reviewer: "deliberate editorial product, not a CRUD admin")
+- **PASS**: sidebar, page headers, table mono+tabular, brand badges, empty states custom
+- **Fixes aplicados**: POS compact header + margen banner border-l-4 (issue detectado en smoke comparativo)
+
+### Tests + verification
+
+- `pnpm tsc --noEmit` clean
+- `pnpm vitest run` 139/139 passing (sin cambios en suite)
+- `pnpm build` clean (37 routes)
+- Production deploy LIVE en https://cumbre-three.vercel.app
+
+### Files changed
+
+31 files. 775 insertions, 482 deletions. 3 new components, 18 modified admin pages, globals.css + sidebar + KpiCard updates.
+
+### Decisiones tecnicas firmed
+
+- AdminPageHeader pattern: eyebrow contextual + Anton h1 + copper rule + actions slot. Reusable en futuras paginas admin.
+- Brand badges: paleta marca (copper/glacier/positive/warning/danger/muted) en lugar de shadcn defaults. Mismo set se puede aplicar a otros demos del kit.
+- POS no usa AdminPageHeader full porque es full-viewport. Compact header con eyebrow + Anton h1 inline + breadcrumb mono tracking.
+- Tailwind v4 entry point per scope: cada globals.css con @theme inline necesita `@import "tailwindcss"` para que las utilities se generen.
+
+### Out of scope (Phase 6 slice 2+)
+
+- Catalogo extendido a ~30 productos (lata 473 + botella 660 + botella 330 + porron + growler + barril + merch)
+- Pre-seed POS data realista (30-50 ventas + 14 sesiones + 2 cashiers extra)
+- Print ticket POS 80mm
+- Sidebar active state matching con query params (`?channel=pos` no marca activo Ventas)
