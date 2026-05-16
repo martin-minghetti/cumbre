@@ -104,9 +104,14 @@ export type SessionHistoryRow = {
 };
 
 export async function listSessions(filters: { userIdScope?: number } = {}): Promise<SessionHistoryRow[]> {
-  const scope = filters.userIdScope
-    ? sql`WHERE cs.opened_by = ${filters.userIdScope}`
+  const conds: ReturnType<typeof sql>[] = [];
+  if (filters.userIdScope != null) {
+    conds.push(sql`cs.opened_by = ${filters.userIdScope}`);
+  }
+  const whereClause = conds.length > 0
+    ? sql.join([sql`WHERE`, sql.join(conds, sql` AND `)], sql` `)
     : sql``;
+
   const r = await db.execute(sql`
     SELECT cs.id, cs.opened_by AS "openedBy",
       u.name AS "openedByName",
@@ -118,7 +123,7 @@ export async function listSessions(filters: { userIdScope?: number } = {}): Prom
       COALESCE((SELECT COUNT(*)::int FROM pos_sales ps WHERE ps.cash_session_id = cs.id), 0) AS "salesCount"
     FROM cash_sessions cs
     JOIN users u ON u.id = cs.opened_by
-    ${scope}
+    ${whereClause}
     ORDER BY cs.opened_at DESC
     LIMIT 100
   `);
