@@ -3,10 +3,11 @@ import type { Route } from 'next';
 import { currentUser } from '@/lib/auth/current-user';
 import { getOpenSessionForUser } from '@/lib/admin/cash-sessions';
 import { openSessionAction } from '../actions';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,9 +19,12 @@ export default async function AbrirCajaPage({ searchParams }: { searchParams: Pr
   const sp = await searchParams;
 
   return (
-    <div className="p-8 max-w-md">
+    <div className="p-8 space-y-8 max-w-md">
+      <AdminPageHeader
+        eyebrow="Caja / Apertura"
+        title="Abrir caja"
+      />
       <Card>
-        <CardHeader><CardTitle>Abrir caja</CardTitle></CardHeader>
         <CardContent>
           <form action={openSessionAction} className="space-y-4">
             <div className="space-y-1">

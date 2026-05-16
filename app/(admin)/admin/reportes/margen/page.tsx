@@ -1,4 +1,5 @@
 import { getMarginByProduct } from '@/lib/admin/reports';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export const dynamic = 'force-dynamic';
@@ -8,14 +9,15 @@ const fmt = (c: number) => new Intl.NumberFormat('es-AR', { style: 'currency', c
 export default async function MargenPage() {
   const rows = await getMarginByProduct(30);
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-8 space-y-8">
       <div className="rounded-md border border-amber-500/40 bg-amber-50 dark:bg-amber-950/20 p-3 text-xs">
         Nota: margen calculado solo sobre ventas online. POS no incluido en este reporte (proxima iteracion).
       </div>
-      <header>
-        <h1 className="text-2xl font-semibold">Margen por producto</h1>
-        <p className="text-sm text-muted-foreground">Ultimos 30 dias. Costo derivado del costo promedio por unidad producida.</p>
-      </header>
+      <AdminPageHeader
+        eyebrow="Analisis / Margen"
+        title="Margen por producto"
+        subtitle="Ultimos 30 dias, costo promedio por unidad producida."
+      />
       <div className="rounded-md border">
         <Table>
           <TableHeader><TableRow>

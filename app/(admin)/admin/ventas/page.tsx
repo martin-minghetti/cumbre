@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { listUnifiedSales, channelFilterSchema, type Channel } from '@/lib/admin/unified-sales';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -43,16 +44,20 @@ export default async function VentasPage({ searchParams }: { searchParams: Promi
     ...(sp.to ? { to: sp.to } : {}),
   });
   const exportHref = `/admin/ventas/export?${qs.toString()}`;
+  const channelLabel = channel === 'all' ? 'online + POS' : channel;
 
   return (
-    <div className="p-8 space-y-6">
-      <header className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-semibold">Ventas</h1>
-          <p className="text-sm text-muted-foreground">{rows.length} registros (max 500), {channel === 'all' ? 'online + POS' : channel}</p>
-        </div>
-        <Button asChild variant="outline"><a href={exportHref}>Exportar CSV</a></Button>
-      </header>
+    <div className="p-8 space-y-8">
+      <AdminPageHeader
+        eyebrow="Operaciones / Ventas"
+        title="Ventas"
+        subtitle={`${rows.length} registros (max 500), ${channelLabel}.`}
+        actions={
+          <Button asChild variant="outline">
+            <a href={exportHref}>Exportar CSV</a>
+          </Button>
+        }
+      />
 
       <form className="flex gap-3 items-end flex-wrap" method="get">
         <div className="space-y-1">

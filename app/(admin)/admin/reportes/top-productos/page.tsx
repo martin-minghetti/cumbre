@@ -1,4 +1,5 @@
 import { getTopProducts } from '@/lib/admin/reports';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export const dynamic = 'force-dynamic';
@@ -8,11 +9,12 @@ const fmt = (c: number) => new Intl.NumberFormat('es-AR', { style: 'currency', c
 export default async function TopProductosPage() {
   const rows = await getTopProducts(30, 10);
   return (
-    <div className="p-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Top 10 productos</h1>
-        <p className="text-sm text-muted-foreground">Ultimos 30 dias, ordenado por revenue.</p>
-      </header>
+    <div className="p-8 space-y-8">
+      <AdminPageHeader
+        eyebrow="Analisis / Ranking"
+        title="Top productos"
+        subtitle="Ultimos 30 dias, ranking por revenue (online + POS)."
+      />
       <div className="rounded-md border">
         <Table>
           <TableHeader><TableRow>

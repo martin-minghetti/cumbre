@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Route } from 'next';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Award, AlertTriangle, Calendar } from 'lucide-react';
 
@@ -12,11 +13,12 @@ const REPORTS = [
 
 export default function ReportesHub() {
   return (
-    <div className="p-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Reportes</h1>
-        <p className="text-sm text-muted-foreground">Snapshots operativos derivados del libro de movimientos.</p>
-      </header>
+    <div className="p-8 space-y-8">
+      <AdminPageHeader
+        eyebrow="Analisis / Reportes"
+        title="Reportes"
+        subtitle="Margen, ranking, stock critico y ventas por periodo."
+      />
       <div className="grid gap-4 md:grid-cols-2">
         {REPORTS.map((r) => (
           <Link key={r.href} href={r.href as Route} className="block">

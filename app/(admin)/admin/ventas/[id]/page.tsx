@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getOrderDetail } from '@/lib/admin/sales';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { MarkFulfilledButton } from './MarkFulfilledButton';
@@ -15,15 +16,13 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   if (!data) notFound();
 
   return (
-    <div className="p-8 space-y-6">
-      <header className="flex justify-between items-start">
-        <div>
-          <p className="text-sm text-muted-foreground">Orden</p>
-          <h1 className="text-2xl font-semibold font-mono">#{data.order.id}</h1>
-          <p className="text-sm">{data.customer.name} ({data.customer.email})</p>
-        </div>
-        {data.order.status === 'paid' ? <MarkFulfilledButton orderId={data.order.id} /> : null}
-      </header>
+    <div className="p-8 space-y-8">
+      <AdminPageHeader
+        eyebrow={`Operaciones / Venta online #${data.order.id}`}
+        title={`Venta #${data.order.id}`}
+        subtitle={`Estado: ${data.order.status}. ${data.customer.name} (${data.customer.email}).`}
+        actions={data.order.status === 'paid' ? <MarkFulfilledButton orderId={data.order.id} /> : null}
+      />
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-normal text-muted-foreground">Estado</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold">{data.order.status}</div></CardContent></Card>

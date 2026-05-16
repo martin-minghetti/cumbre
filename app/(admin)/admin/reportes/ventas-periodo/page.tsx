@@ -1,4 +1,5 @@
 import { getSalesByPeriod } from '@/lib/admin/reports';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export const dynamic = 'force-dynamic';
@@ -9,11 +10,12 @@ export default async function VentasPeriodoPage() {
   const rows = await getSalesByPeriod(30);
   const total = rows.reduce((s, r) => s + r.totalCents, 0);
   return (
-    <div className="p-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Ventas por dia</h1>
-        <p className="text-sm text-muted-foreground">Ultimos 30 dias. Total: {fmt(total)}</p>
-      </header>
+    <div className="p-8 space-y-8">
+      <AdminPageHeader
+        eyebrow="Analisis / Periodo"
+        title="Ventas por dia"
+        subtitle={`Ultimos 30 dias, TZ Argentina. Total: ${fmt(total)}.`}
+      />
       <div className="rounded-md border">
         <Table>
           <TableHeader><TableRow>

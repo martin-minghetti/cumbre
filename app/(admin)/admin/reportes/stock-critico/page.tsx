@@ -1,4 +1,5 @@
 import { getCriticalStockProducts } from '@/lib/admin/reports';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export const dynamic = 'force-dynamic';
@@ -6,11 +7,12 @@ export const dynamic = 'force-dynamic';
 export default async function StockCriticoPage() {
   const rows = await getCriticalStockProducts();
   return (
-    <div className="p-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Stock critico</h1>
-        <p className="text-sm text-muted-foreground">Productos e insumos bajo su reorder point.</p>
-      </header>
+    <div className="p-8 space-y-8">
+      <AdminPageHeader
+        eyebrow="Analisis / Stock critico"
+        title="Stock critico"
+        subtitle="Productos e insumos bajo el reorder point."
+      />
       <div className="rounded-md border">
         <Table>
           <TableHeader><TableRow>

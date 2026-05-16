@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { listPurchaseOrders } from '@/lib/admin/purchase-orders';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -9,14 +10,17 @@ const fmt = (c: number) => new Intl.NumberFormat('es-AR', { style: 'currency', c
 export default async function ComprasPage() {
   const rows = await listPurchaseOrders();
   return (
-    <div className="p-8 space-y-6">
-      <header className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-semibold">Ordenes de compra</h1>
-          <p className="text-sm text-muted-foreground">{rows.length} ordenes registradas</p>
-        </div>
-        <Button asChild><Link href={'/admin/compras/nueva' as Route}>Nueva OC</Link></Button>
-      </header>
+    <div className="p-8 space-y-8">
+      <AdminPageHeader
+        eyebrow="Operaciones / Compras"
+        title="Ordenes de compra"
+        subtitle="Insumos en flujo: draft, placed, received, paid."
+        actions={
+          <Button asChild>
+            <Link href={'/admin/compras/nueva' as Route}>Nueva OC</Link>
+          </Button>
+        }
+      />
       <div className="rounded-md border">
         <Table>
           <TableHeader>

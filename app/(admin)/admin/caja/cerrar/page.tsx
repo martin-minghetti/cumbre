@@ -5,10 +5,11 @@ import { db } from '@/db';
 import { sql } from 'drizzle-orm';
 import { getOpenSessionForUser, calcExpectedAmountCents } from '@/lib/admin/cash-sessions';
 import { closeSessionAction } from '../actions';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,9 +36,13 @@ export default async function CerrarCajaPage({ searchParams }: { searchParams: P
   );
 
   return (
-    <div className="p-8 max-w-md space-y-4">
+    <div className="p-8 space-y-8 max-w-md">
+      <AdminPageHeader
+        eyebrow="Caja / Cierre"
+        title="Cerrar caja"
+        subtitle={`Sesion #${open.id}, contar fisico y registrar diferencia.`}
+      />
       <Card>
-        <CardHeader><CardTitle>Cerrar caja</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <div className="text-sm text-muted-foreground">
             <p>Sesion #{open.id} abierta {new Date(open.openedAt).toLocaleString('es-AR')}</p>

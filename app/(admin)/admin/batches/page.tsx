@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { listBatchesWithRemaining } from '@/lib/admin/batches';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -20,14 +21,17 @@ function fmtDate(s: string): string {
 export default async function BatchesPage() {
   const rows = await listBatchesWithRemaining();
   return (
-    <div className="p-8 space-y-6">
-      <header className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-semibold">Batches</h1>
-          <p className="text-sm text-muted-foreground">{rows.length} lotes registrados</p>
-        </div>
-        <Button asChild><Link href={'/admin/produccion/nuevo' as Route}>Registrar batch</Link></Button>
-      </header>
+    <div className="p-8 space-y-8">
+      <AdminPageHeader
+        eyebrow="Catalogo / Lotes"
+        title="Batches"
+        subtitle="Trazabilidad por lote: ABV, IBU, fecha envasado, costo."
+        actions={
+          <Button asChild>
+            <Link href={'/admin/produccion/nuevo' as Route}>Registrar batch</Link>
+          </Button>
+        }
+      />
       <div className="rounded-md border">
         <Table>
           <TableHeader>

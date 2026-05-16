@@ -1,22 +1,24 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { listSuppliers } from '@/lib/admin/suppliers';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export default async function SuppliersPage() {
   const rows = await listSuppliers();
   return (
-    <div className="p-8 space-y-6">
-      <header className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-semibold">Proveedores</h1>
-          <p className="text-sm text-muted-foreground">{rows.length} proveedores</p>
-        </div>
-        <Button asChild>
-          <Link href={'/admin/proveedores/nuevo' as Route}>Nuevo proveedor</Link>
-        </Button>
-      </header>
+    <div className="p-8 space-y-8">
+      <AdminPageHeader
+        eyebrow="Catalogo / Proveedores"
+        title="Proveedores"
+        subtitle="Contactos y CUIT de proveedores de insumos."
+        actions={
+          <Button asChild>
+            <Link href={'/admin/proveedores/nuevo' as Route}>Nuevo proveedor</Link>
+          </Button>
+        }
+      />
       <div className="rounded-md border">
         <Table>
           <TableHeader>

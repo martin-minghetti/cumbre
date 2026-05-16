@@ -3,6 +3,7 @@ import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { currentUser } from '@/lib/auth/current-user';
 import { getOpenSessionForUser, listSessions } from '@/lib/admin/cash-sessions';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -22,8 +23,12 @@ export default async function CajaPage({ searchParams }: { searchParams: Promise
   const history = await listSessions(user.role === 'owner' ? {} : { userIdScope: user.id });
 
   return (
-    <div className="p-8 space-y-6">
-      <h1 className="text-2xl font-semibold">Caja</h1>
+    <div className="p-8 space-y-8">
+      <AdminPageHeader
+        eyebrow="Caja / Sesiones"
+        title="Caja"
+        subtitle="Apertura, cierre y arqueo del turno."
+      />
 
       {sp.error && (
         <p className="text-sm text-destructive">Error: {sp.error}</p>

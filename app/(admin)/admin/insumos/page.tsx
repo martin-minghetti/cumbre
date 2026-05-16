@@ -1,22 +1,24 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { listSupplies } from '@/lib/admin/supplies';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export default async function SuppliesPage() {
   const rows = await listSupplies();
   return (
-    <div className="p-8 space-y-6">
-      <header className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-semibold">Insumos</h1>
-          <p className="text-sm text-muted-foreground">{rows.length} insumos</p>
-        </div>
-        <Button asChild>
-          <Link href={'/admin/insumos/nuevo' as Route}>Nuevo insumo</Link>
-        </Button>
-      </header>
+    <div className="p-8 space-y-8">
+      <AdminPageHeader
+        eyebrow="Catalogo / Insumos"
+        title="Insumos"
+        subtitle="Maltas, lupulos, envases, etiquetas. Stock actual y reorder."
+        actions={
+          <Button asChild>
+            <Link href={'/admin/insumos/nuevo' as Route}>Nuevo insumo</Link>
+          </Button>
+        }
+      />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
