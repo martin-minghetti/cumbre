@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import type { Route } from 'next';
 import { type ProductWithExtras, fmtAbv, fmtFormat, fmtPrice } from '@/lib/products';
 
@@ -27,27 +28,18 @@ export function CumbreCard({
         <span>N° {String(index + 1).padStart(2, '0')}</span>
         <span>{product.name}</span>
       </div>
-      <div
-        className="relative mb-7 grid aspect-[3/4] place-items-center overflow-hidden"
-        style={{
-          background:
-            'radial-gradient(ellipse at 50% 60%, rgba(200, 132, 58, 0.4), transparent 65%), linear-gradient(180deg, #1a1410 0%, #0a0606 100%)',
-        }}
-      >
-        <div
-          aria-hidden
-          className="h-[76%] w-[38%]"
-          style={{
-            background: 'linear-gradient(180deg, rgba(200,132,58,0.7), rgba(120,70,30,0.85))',
-            clipPath:
-              'polygon(35% 0%, 65% 0%, 65% 16%, 70% 26%, 70% 100%, 30% 100%, 30% 26%, 35% 16%)',
-            boxShadow:
-              'inset 4px 0 16px rgba(0,0,0,0.4), inset -4px 0 16px rgba(245,240,232,0.05)',
-          }}
-        />
-        <span className="absolute left-1/2 top-[38%] z-[2] w-[26%] -translate-x-1/2 bg-paper px-1 py-2 text-center font-display text-[11px] uppercase tracking-[0.04em] text-[#1a1410]">
-          Cumbre
-        </span>
+      <div className="relative mb-7 aspect-[3/4] overflow-hidden bg-[#050608]">
+        {product.heroImageUrl ? (
+          <Image
+            src={product.heroImageUrl}
+            alt={`${product.name} ${product.style}`}
+            fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            className="object-cover transition duration-700 group-hover:scale-[1.02]"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_60%,rgba(200,132,58,0.4),transparent_65%),linear-gradient(180deg,#1a1410_0%,#0a0606_100%)]" />
+        )}
       </div>
       <h3 className="mb-2 font-display text-[56px] uppercase leading-[0.92] tracking-[-0.005em]">{product.name}</h3>
       <p className="mb-6 font-body text-[17px] italic text-accent">

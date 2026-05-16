@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { Route } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { fmtAbv, fmtFormat, fmtPrice, getProductBySlug } from '@/lib/products';
 import { AddToCartButton } from '@/components/public/AddToCartButton';
 
@@ -98,60 +99,34 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       {/* Product main */}
       <section className="mx-auto grid max-w-[1500px] grid-cols-1 items-stretch pb-20 md:grid-cols-[1.1fr_1fr]">
         {/* Left: image */}
-        <div
-          className="relative min-h-[70vh] overflow-hidden border-r border-line md:min-h-[90vh]"
-          style={{
-            background:
-              'radial-gradient(ellipse at 50% 65%, rgba(200,132,58,0.45), transparent 60%), linear-gradient(180deg, #0d0a08 0%, #1a1208 45%, #0a0606 100%)',
-          }}
-        >
-          {/* topo contour lines */}
-          <div
-            aria-hidden
-            className="absolute inset-0 opacity-70"
-            style={{
-              backgroundImage: `
-                radial-gradient(ellipse 50% 30% at 50% 60%, transparent 78%, rgba(200,132,58,0.13) 80%, transparent 82%),
-                radial-gradient(ellipse 40% 22% at 50% 60%, transparent 75%, rgba(200,132,58,0.13) 77%, transparent 79%),
-                radial-gradient(ellipse 30% 16% at 50% 60%, transparent 70%, rgba(200,132,58,0.13) 72%, transparent 74%),
-                radial-gradient(ellipse 22% 12% at 50% 60%, transparent 65%, rgba(200,132,58,0.13) 67%, transparent 69%)
-              `,
-            }}
-          />
-          {/* can silhouette */}
-          <div
-            aria-hidden
-            className="absolute left-1/2 top-1/2 h-[70%] w-[30%] -translate-x-1/2 -translate-y-1/2 rounded-md"
-            style={{
-              background:
-                'linear-gradient(90deg, rgba(200,132,58,0.85) 0%, rgba(225,160,90,0.95) 25%, rgba(180,100,40,1) 50%, rgba(225,160,90,0.95) 75%, rgba(200,132,58,0.85) 100%)',
-              boxShadow: 'inset 0 0 28px rgba(0,0,0,0.35), 0 30px 60px rgba(0,0,0,0.5)',
-            }}
-          />
-          {/* label */}
-          <div className="absolute left-1/2 top-1/2 z-[3] w-[24%] -translate-x-1/2 -translate-y-1/2 border-y-[3px] border-accent-deep bg-paper px-3 py-4 text-center text-[#1a1410]">
-            <div className="mb-2 font-mono text-[9px] font-medium uppercase tracking-[0.24em] text-accent-deep">▲ {product.style}</div>
-            <div className="mb-1.5 font-display text-[30px] uppercase leading-[0.9] tracking-[0.01em]">{product.name}</div>
-            <div className="font-body text-[11px] italic leading-[1.4] text-[#5a3520]">
-              Patagonia · 41°S · sin pasteurizar · {product.format === 'lata_473' ? '473 ml' : '1 L'}
-            </div>
-            <div className="mt-3 font-mono text-[9px] uppercase tracking-[0.22em] text-accent-deep">
-              ▲ {altitude ?? '—'} m
-            </div>
-          </div>
-          {/* corner */}
-          <div className="absolute left-9 top-9 font-mono text-[10.5px] uppercase tracking-[0.22em] text-[rgba(245,240,232,0.55)]">
+        <div className="relative min-h-[70vh] overflow-hidden border-r border-line bg-[#050608] md:min-h-[90vh]">
+          {product.heroImageUrl ? (
+            <Image
+              src={product.heroImageUrl}
+              alt={`${product.name} ${product.style}`}
+              fill
+              priority
+              sizes="(min-width: 768px) 55vw, 100vw"
+              className="object-cover"
+            />
+          ) : null}
+          {/* corner editorial */}
+          <div className="absolute left-9 top-9 z-[2] font-mono text-[10.5px] uppercase tracking-[0.22em] text-[rgba(245,240,232,0.7)] mix-blend-screen">
             <strong className="font-medium text-accent">N° {String(product.id).padStart(2, '0')}</strong> · Línea Cumbres · 2026
           </div>
           {/* altitude bottom-left */}
           {altitude && (
-            <div className="absolute bottom-9 left-9 font-display text-[80px] leading-[0.85] tracking-[-0.01em] text-[rgba(200,132,58,0.45)]">
+            <div className="absolute bottom-9 left-9 z-[2] font-display text-[80px] leading-[0.85] tracking-[-0.01em] text-[rgba(200,132,58,0.55)] mix-blend-screen">
               {altitude.toLocaleString()}
-              <small className="mt-2 block font-mono text-[11px] uppercase tracking-[0.22em] text-[rgba(245,240,232,0.4)]">
+              <small className="mt-2 block font-mono text-[11px] uppercase tracking-[0.22em] text-[rgba(245,240,232,0.6)]">
                 Metros · {product.name}, Bariloche
               </small>
             </div>
           )}
+          {/* format pill bottom-right */}
+          <div className="absolute bottom-9 right-9 z-[2] border border-line bg-[rgba(10,8,6,0.7)] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.22em] text-accent backdrop-blur-sm">
+            {product.format === 'lata_473' ? '473 ml' : '1 L'} · Patagonia 41°S
+          </div>
         </div>
 
         {/* Right: info */}
