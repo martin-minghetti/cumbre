@@ -65,16 +65,27 @@ export type TopProductRow = { productId: number; name: string; units: number; re
 
 export async function getTopProducts(rangeDays = 30, limit = 10): Promise<TopProductRow[]> {
   const r = await db.execute(sql`
-    SELECT p.id AS "productId", p.name,
-      SUM(oi.qty * pd.size)::int AS units,
-      SUM(oi.line_total_cents)::bigint AS "revenueCents"
-    FROM order_items oi
-    JOIN pack_definitions pd ON pd.id = oi.pack_definition_id
-    JOIN products p ON p.id = pd.product_id
-    JOIN orders o ON o.id = oi.order_id
-    WHERE o.status IN ('paid', 'fulfilled')
-      AND o.created_at >= NOW() - (${rangeDays} || ' days')::interval
-    GROUP BY p.id, p.name
+    SELECT * FROM (
+      SELECT p.id AS "productId", p.name,
+        SUM(units)::int AS units,
+        SUM(revenue)::bigint AS "revenueCents"
+      FROM (
+        SELECT pd.product_id, (oi.qty * pd.size) AS units, oi.line_total_cents AS revenue
+        FROM order_items oi
+        JOIN pack_definitions pd ON pd.id = oi.pack_definition_id
+        JOIN orders o ON o.id = oi.order_id
+        WHERE o.status IN ('paid', 'fulfilled')
+          AND o.created_at >= NOW() - (${rangeDays} || ' days')::interval
+        UNION ALL
+        SELECT pd.product_id, (psi.qty * pd.size) AS units, (psi.qty * psi.unit_price_cents)::bigint AS revenue
+        FROM pos_sale_items psi
+        JOIN pack_definitions pd ON pd.id = psi.pack_definition_id
+        JOIN pos_sales ps ON ps.id = psi.pos_sale_id
+        WHERE ps.created_at >= NOW() - (${rangeDays} || ' days')::interval
+      ) all_sales
+      JOIN products p ON p.id = all_sales.product_id
+      GROUP BY p.id, p.name
+    ) sub
     ORDER BY "revenueCents" DESC
     LIMIT ${limit}
   `);
@@ -125,13 +136,24 @@ export type SalesByDayRow = { day: string; orders: number; totalCents: number };
 
 export async function getSalesByPeriod(rangeDays = 30): Promise<SalesByDayRow[]> {
   const r = await db.execute(sql`
-    SELECT to_char(date_trunc('day', o.created_at AT TIME ZONE 'America/Argentina/Buenos_Aires'), 'YYYY-MM-DD') AS day,
-      COUNT(*)::int AS orders,
-      SUM(o.total_cents)::bigint AS "totalCents"
-    FROM orders o
-    WHERE o.status IN ('paid', 'fulfilled')
-      AND o.created_at >= NOW() - (${rangeDays} || ' days')::interval
-    GROUP BY to_char(date_trunc('day', o.created_at AT TIME ZONE 'America/Argentina/Buenos_Aires'), 'YYYY-MM-DD')
+    SELECT day, SUM(orders)::int AS orders, SUM("totalCents")::bigint AS "totalCents"
+    FROM (
+      SELECT to_char(date_trunc('day', o.created_at AT TIME ZONE 'America/Argentina/Buenos_Aires'), 'YYYY-MM-DD') AS day,
+        COUNT(*)::int AS orders,
+        SUM(o.total_cents)::bigint AS "totalCents"
+      FROM orders o
+      WHERE o.status IN ('paid', 'fulfilled')
+        AND o.created_at >= NOW() - (${rangeDays} || ' days')::interval
+      GROUP BY 1
+      UNION ALL
+      SELECT to_char(date_trunc('day', ps.created_at AT TIME ZONE 'America/Argentina/Buenos_Aires'), 'YYYY-MM-DD') AS day,
+        COUNT(*)::int AS orders,
+        SUM(ps.total_cents)::bigint AS "totalCents"
+      FROM pos_sales ps
+      WHERE ps.created_at >= NOW() - (${rangeDays} || ' days')::interval
+      GROUP BY 1
+    ) sub
+    GROUP BY day
     ORDER BY day ASC
   `);
   return r.rows.map((row) => {

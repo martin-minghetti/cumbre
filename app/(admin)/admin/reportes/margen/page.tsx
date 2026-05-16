@@ -9,6 +9,9 @@ export default async function MargenPage() {
   const rows = await getMarginByProduct(30);
   return (
     <div className="p-8 space-y-6">
+      <div className="rounded-md border border-amber-500/40 bg-amber-50 dark:bg-amber-950/20 p-3 text-xs">
+        Nota: margen calculado solo sobre ventas online. POS no incluido en este reporte (proxima iteracion).
+      </div>
       <header>
         <h1 className="text-2xl font-semibold">Margen por producto</h1>
         <p className="text-sm text-muted-foreground">Ultimos 30 dias. Costo derivado del costo promedio por unidad producida.</p>
