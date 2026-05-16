@@ -28,14 +28,14 @@ export function CumbreCard({
         <span>N° {String(index + 1).padStart(2, '0')}</span>
         <span>{product.name}</span>
       </div>
-      <div className="relative mb-7 aspect-[3/4] overflow-hidden bg-[#050608]">
+      <div className="mb-7 aspect-[3/4] overflow-hidden bg-[#050608]">
         {product.heroImageUrl ? (
           <Image
             src={product.heroImageUrl}
             alt={`${product.name} ${product.style}`}
-            fill
-            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-            className="object-cover transition duration-700 group-hover:scale-[1.02]"
+            width={600}
+            height={800}
+            className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.02]"
           />
         ) : (
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_60%,rgba(200,132,58,0.4),transparent_65%),linear-gradient(180deg,#1a1410_0%,#0a0606_100%)]" />
