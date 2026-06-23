@@ -2,7 +2,7 @@
 
 > Production-grade white-label brewery management system. Public storefront + ERP-lite admin (batch traceability, stock movements, suppliers, purchase orders, POS, cash register, reports). One deploy per client.
 
-Live demo: TBD after first deploy
+Live demo: https://cumbre-three.vercel.app
 Setup guide: [SETUP.md](./SETUP.md)
 Build log: [BUILD_LOG.md](./BUILD_LOG.md)
 
