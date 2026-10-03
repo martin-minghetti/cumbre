@@ -9,11 +9,12 @@ export const dynamic = 'force-dynamic';
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string; error?: string }>;
+  searchParams: Promise<{ redirect?: string; error?: string; demo?: string }>;
 }) {
   const sp = await searchParams;
   const redirect = sp.redirect && isSafeRelative(sp.redirect) ? sp.redirect : '/admin';
   const error = sp.error;
+  const demo = DEMO_USERS.find((u) => u.role === sp.demo);
 
   return (
     <Card className="w-full max-w-sm">
@@ -27,7 +28,7 @@ export default async function LoginPage({
           <input type="hidden" name="redirect" value={redirect} />
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" required autoComplete="email" />
+            <Input id="email" name="email" type="email" required autoComplete="email" defaultValue={demo?.email} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password">Password</Label>
@@ -37,6 +38,7 @@ export default async function LoginPage({
               type="password"
               required
               autoComplete="current-password"
+              defaultValue={demo?.password}
             />
           </div>
           {error ? <p className="text-sm text-red-500">Credenciales invalidas.</p> : null}
