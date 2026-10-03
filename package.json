@@ -16,7 +16,8 @@
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx scripts/seed.ts",
     "setup:owner": "tsx scripts/setup-owner.ts",
-    "setup:cashier": "tsx scripts/setup-cashier.ts"
+    "setup:cashier": "tsx scripts/setup-cashier.ts",
+    "setup:demo": "tsx scripts/setup-demo-users.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.0",

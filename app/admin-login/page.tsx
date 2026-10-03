@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { isSafeRelative } from '@/lib/safe-redirect';
+import { DEMO_USERS } from '@/config/demo-users';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,6 +47,14 @@ export default async function LoginPage({
             Entrar
           </button>
         </form>
+        <div className="mt-6 border-t pt-4 font-mono text-xs">
+          <p className="mb-2 uppercase tracking-[0.18em] opacity-60">Cuentas demo</p>
+          {DEMO_USERS.map((u) => (
+            <p key={u.email} className="leading-relaxed">
+              <span className="uppercase opacity-60">{u.role}</span> {u.email} / {u.password}
+            </p>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

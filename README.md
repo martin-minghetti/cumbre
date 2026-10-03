@@ -3,6 +3,14 @@
 > Production-grade white-label brewery management system. Public storefront + ERP-lite admin (batch traceability, stock movements, suppliers, purchase orders, POS, cash register, reports). One deploy per client.
 
 Live demo: https://cumbre-three.vercel.app
+Admin demo: https://cumbre-three.vercel.app/admin-login
+
+| Role | Email | Password | Lands on |
+|------|-------|----------|----------|
+| Owner | `owner@cumbre.beer` | `cumbre-owner` | `/admin` (full ERP) |
+| Cashier | `cashier@cumbre.beer` | `cumbre-cashier` | `/admin/pos` (POS + cash register only) |
+
+Demo accounts are public and shared; data may be changed by other visitors. Recreate them with `pnpm setup:demo`.
 Setup guide: [SETUP.md](./SETUP.md)
 Build log: [BUILD_LOG.md](./BUILD_LOG.md)
 
